@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">thodea</string>
+    <string name="post">Post</string>
+    <string name="feed">Feed</string>
+    <string name="search">Search</string>
+    <string name="profile">Profile</string>
+</resources>

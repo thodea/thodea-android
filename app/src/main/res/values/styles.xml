@@ -1,0 +1,10 @@
+<resources>
+
+    <!-- Your existing styles here -->
+
+    <style name="BottomNavigationView.NoShrink" parent="Widget.MaterialComponents.BottomNavigationView">
+        <item name="itemIconSize">48dp</item> <!-- Bigger icons -->
+        <item name="itemHorizontalTranslationEnabled">false</item>
+    </style>
+
+</resources>

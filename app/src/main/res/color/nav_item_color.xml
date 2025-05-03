@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:color="#6B7280" android:state_checked="false"/> <!-- Gray-400 -->
+    <item android:color="#DDD" android:state_checked="true"/>  <!-- Gray-900 when selected -->
+</selector>
