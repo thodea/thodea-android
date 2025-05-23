@@ -27,7 +27,7 @@ fun BottomNavigationBar(navController: NavHostController) {
     val currentRoute = navBackStackEntry?.destination?.route
 
     NavigationBar(
-        containerColor = Color(0x99172554), // 0x99 = 60% opacity (in hex) of rgb(23,37,84)
+        containerColor = Color.Transparent, // 0x99 = 60% opacity (in hex) of rgb(23,37,84)
         tonalElevation = 0.dp
     ) {
         navItems.forEach { item ->
