@@ -1,6 +1,8 @@
 package com.example.thodea.ui.composables.tabs
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,10 +15,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.mutableStateOf
@@ -34,8 +40,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import com.example.thodea.R
 
 @Composable
 fun PostScreen(
@@ -89,11 +101,29 @@ fun ThreeRowLayout(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Hidden text (still takes space if you use alpha = 0f)
-            Text(
-                text = hiddenText,
-                modifier = Modifier.alpha(0f) // Invisible but occupies space
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically // aligns circle with the text's middle
+            ) {
+                Text(
+                    text = hiddenText,
+                    fontSize = 20.sp,
+                    color = Color(0xFF8B8B8B),
+                    modifier = Modifier
+                        .alpha(if (textValue.trim().isNotEmpty()) 1f else 0f)
+                        .clickable { onTextChange("") }
+                )
 
+                Spacer(modifier = Modifier.width(8.dp)) // spacing between text and circle
+
+                Box(
+                    modifier = Modifier
+                        .alpha(if (textValue.trim().isNotEmpty()) 1f else 0f)
+                        .padding(top = 2.dp)
+                        .size(8.dp) // tiny circle
+                        .clip(CircleShape)
+                        .background(Color(147, 197, 253)) // Tailwind-style blue-500
+                )
+            }
             Button(
                 onClick = onButtonClick,
                 modifier = Modifier
@@ -151,6 +181,7 @@ fun ThreeRowLayout(
 
         // Row 2: Input Text Field
         BasicTextField(
+            maxLines = 7,
             value = textValue,
             onValueChange = onTextChange,
             modifier = Modifier
@@ -161,7 +192,7 @@ fun ThreeRowLayout(
                     val strokeWidth = 1.dp.toPx()
                     val y = size.height // Position at the bottom of the component
                     drawLine(
-                        color = Color.Blue,
+                        color = Color(30, 58, 138),
                         start = Offset(0f, y),
                         end = Offset(size.width, y),
                         strokeWidth = strokeWidth
@@ -190,43 +221,69 @@ fun ThreeRowLayout(
                 }
             }
         )
+
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Row 3: Hidden Row
+        // Row 3: Media input
         Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
-                .fillMaxWidth()
-                .height(0.dp) // Or use alpha(0f) to keep space
+                .clickable(onClick = { } )
+                .padding(end = 32.dp) // pr-8 in Tailwind (8 * 4 = 32)
         ) {
-            // Hidden content
-            Text(
-                text = "Hidden row content",
-                modifier = Modifier.alpha(0f) // Invisible but keeps height if needed
+            // SVG icon - you'll need to add the vector asset to your project
+            Icon(
+                painter = painterResource(id = R.drawable.ic_media_input), // Replace with your actual SVG
+                contentDescription = "Image icon",
+                tint = Color(0xFF3B82F6), // Adjust color as needed
+                modifier = Modifier
+                    .width(24.dp)
+                    .height(24.dp)
             )
+        }
+
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Row 4: POST Button
+        val canPost = textValue.trim().isNotEmpty() // or your own logic
+
+        if (canPost) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(40.dp)
+                    .padding(top = 8.dp)
+                    .shadow(
+                        elevation = 4.dp,
+                        shape = RoundedCornerShape(8.dp),
+                        // Optional: adjust these for different shadow appearances
+                        clip = false, // set to true if you want content to respect the rounded corners
+                        ambientColor = Color.Black,
+                        spotColor = Color.Black
+                    )
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color(0xFF3B82F6), // blue-500
+                                Color(0xFF1E40AF)  // Light blue bottom
+                            )
+                        )
+                    )
+                    .clickable {
+                        // call your post handler here
+                        // handlePost(userName, textValue, assetExtension)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "POST",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(229, 231, 235)
+                )
+            }
         }
     }
 }
-
-
-
-
-
-/*
-@Preview(showBackground = true)
-@Composable
-fun PostScreenPreview() {
-    PostScreen(
-        hiddenText = "reset",
-        onButtonClick = {},
-        textValue = "",
-        onTextChange = {}
-    )
-}
-
-/*@Preview(showBackground = true)
-@Composable
-fun ArtistCardPreview() {
-    MaterialTheme {
-        ArtistCard()
-    }
-}*/*/
