@@ -18,7 +18,15 @@ import com.example.thodea.ui.composables.tabs.SearchScreen
 @Composable
 fun NavigationScreens(navController: NavHostController) {
     NavHost(navController, startDestination = NavItem.Post.path) {
-        composable(NavItem.Post.path) { PostScreen() }
+        composable(NavItem.Post.path) {
+            PostScreen(onNavigateToFeed = {
+                navController.navigate(NavItem.Feed.path) {
+                    popUpTo(NavItem.Post.path) {
+                        inclusive = true
+                    }
+                }
+            })
+        }
         composable(NavItem.Feed.path) { FeedScreen() }
         composable(NavItem.Search.path) { SearchScreen() }
         composable(NavItem.Profile.path) { ProfileScreen() }
