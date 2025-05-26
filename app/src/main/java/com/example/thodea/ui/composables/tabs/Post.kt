@@ -207,7 +207,7 @@ fun ThreeRowLayout(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp) // Additional padding between text and border
+                        .padding(bottom = 4.dp) // Additional padding between text and border
                 ) {
                     if (textValue.isEmpty()) {
                         Text(
