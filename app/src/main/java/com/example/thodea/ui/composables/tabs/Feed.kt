@@ -7,14 +7,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -42,23 +39,27 @@ fun FeedScreenPreview() {
 
 @Composable
 fun FeedScreen() {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF111827)), // dark background (#111827)
-    ) {
-        Column(
+
+    Scaffold(
+        containerColor = Color(0xFF111827) // Dark background (#111827)
+    ) { paddingValues ->
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .padding(top = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .padding(paddingValues)
         ) {
-            FollowToCustomizeFeed()
-            Spacer(modifier = Modifier.height(8.dp))
-            MonthlyLovedLabel()
-            Spacer(modifier = Modifier.height(8.dp))
-            MostFollowedLabel()
+            Column(modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                FollowToCustomizeFeed()
+                Spacer(modifier = Modifier.height(8.dp))
+                MonthlyLovedLabel()
+                Spacer(modifier = Modifier.height(8.dp))
+                MostFollowedLabel()
+            }
+
         }
     }
 }
@@ -83,7 +84,7 @@ fun GradientText(
 @Composable
 fun FollowToCustomizeFeed() {
     Row(
-        modifier = Modifier.padding(bottom = 6.dp).alpha(0.9f)
+        modifier = Modifier.padding(bottom = 4.dp).alpha(0.9f)
     ) {
         Text(
             text = "follow to customize feed",
