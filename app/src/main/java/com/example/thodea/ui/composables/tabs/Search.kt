@@ -8,15 +8,12 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
@@ -64,7 +61,6 @@ fun SearchScreen() {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .windowInsetsPadding(WindowInsets.statusBars)
         ) {
             FirstRowLayout(
                 onButtonClick = { },
@@ -85,7 +81,7 @@ fun FirstRowLayout(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
+            .padding(16.dp),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -153,7 +149,7 @@ fun FirstRowLayout(
                 }
 
             }
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(8.dp))
 
             // Search Icon
             Box(
@@ -174,7 +170,7 @@ fun FirstRowLayout(
         }
 
         // Selection tabs
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -227,7 +223,7 @@ fun TabSelector(
         if (selectedItem == "Thoughts") {
             Row(
                 modifier = Modifier
-                    .padding(top = 12.dp)
+                    .padding(top = 16.dp)
                     .fillMaxWidth(),
                 horizontalArrangement = Arrangement.Start,
                 verticalAlignment = Alignment.CenterVertically

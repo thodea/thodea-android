@@ -92,7 +92,7 @@ fun ThreeRowLayout(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp),
     ) {
         // Row 1: Hidden Text (left) and Button (right)
         Row(
