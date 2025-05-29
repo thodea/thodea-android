@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -23,12 +24,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,6 +56,8 @@ val profileInfo = ProfileInfo(followers = 1200, following = 256)
 
 @Composable
 fun ProfileScreen() {
+    var selectedTab by remember { mutableStateOf("thoughts") }
+
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827)
     ) { paddingValues ->
@@ -60,6 +67,8 @@ fun ProfileScreen() {
                 .padding(paddingValues)
         ) {
             FirstRowLayout(
+                selectedTab = selectedTab,
+                onSelectTab = { tab -> selectedTab = tab },
                 profileInfo = profileInfo,
                 onFollowersClick = {
                     // Handle followers click
@@ -77,10 +86,13 @@ fun ProfileScreen() {
 
 @Composable
 fun FirstRowLayout(
+    selectedTab: String,
+    onSelectTab: (String) -> Unit,
     profileInfo: ProfileInfo?,
     onFollowersClick: () -> Unit,
     onFollowingClick: () -> Unit
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -181,6 +193,44 @@ fun FirstRowLayout(
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
+
+        Row(
+            modifier = Modifier
+                .padding(top = 16.dp)
+                .fillMaxWidth()
+                .height(100.dp)
+        ) {
+            ProfileNavScreen(
+                selectedTab = selectedTab,
+                onSelectTab = onSelectTab)
+        }
+
+        // Display section based on selected tab
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(150.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            val (bgColor, label) = when (selectedTab) {
+                "thoughts" -> Pair(Color(0xFF143FAB), "Thoughts content")     // Blue-600
+                "loved" -> Pair(Color(0xFF3A0E77), "Loved content")           // Pink-500
+                "mentioned" -> Pair(Color(0xFF094430), "Mentioned content")   // Emerald-500
+                else -> Pair(Color.Gray, "")
+            }
+
+            Box(
+                modifier = Modifier
+                    .background(bgColor, shape = RoundedCornerShape(16.dp))
+                    .padding(horizontal = 24.dp, vertical = 12.dp)
+            ) {
+                Text(
+                    text = label,
+                    fontSize = 18.sp,
+                    color = Color.White
+                )
+            }
+        }
     }
 }
 
@@ -193,21 +243,24 @@ fun ProfileStatRow(
     enabled: Boolean,
     onClick: () -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
+    val windowInfo = LocalWindowInfo.current
+    val density = LocalDensity.current
 
-    // Calculate width based on screen size (25.dp min, 100.dp max)
-    val dividerWidth = remember(screenWidth) {
-        // You can adjust these ratios as needed
-        if (screenWidth < 360.dp) { // Small screen
-            25.dp
-        } else if (screenWidth < 480.dp) { // Medium screen
-            50.dp
-        } else { // Large screen
-            100.dp
+    // Convert containerSize width (in px) to dp
+    val screenWidthDp = remember(windowInfo) {
+        with(density) {
+            windowInfo.containerSize.width.toDp()
         }
     }
 
+    // Calculate width based on actual window size
+    val dividerWidth = remember(screenWidthDp) {
+        when {
+            screenWidthDp < 360.dp -> 25.dp // Small screen
+            screenWidthDp < 480.dp -> 50.dp // Medium screen
+            else -> 100.dp // Large screen
+        }
+    }
     val interactionModifier = if (enabled) {
         Modifier.clickable { onClick() }
     } else {
@@ -283,6 +336,125 @@ fun formatNumber(num: Int): String {
         num >= 1_000_000 -> "${(num / 1_000_000).toFloat().let { if (it % 1 == 0f) it.toInt() else it }}m"
         num >= 1_000 -> "${(num / 1_000).toFloat().let { if (it % 1 == 0f) it.toInt() else it }}k"
         else -> num.toString()
+    }
+}
+
+@Composable
+fun ProfileNavScreen(selectedTab: String,
+                     onSelectTab: (String) -> Unit,) {
+    // State for currently selected tab
+
+    // Example profile info
+    val profileInfo = mapOf("thoughts" to 123, "loved" to 45, "mentioned" to 10)
+
+    // Optional: Example flag for top margin
+    val bioInfo = true
+
+    // Pass all props into ProfileTabs
+    ProfileTabs(
+        bioInfo = bioInfo,
+        profileInfo = profileInfo,
+        selectedTab = selectedTab,
+        onSelectTab = onSelectTab
+    )
+}
+
+@Composable
+fun ProfileTabs(
+    bioInfo: Boolean,
+    profileInfo: Map<String, Any>,
+    selectedTab: String,
+    onSelectTab: (String) -> Unit
+) {
+    val modifier = if (bioInfo) Modifier.padding(top = 8.dp) else Modifier.padding(top = 16.dp)
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .heightIn(max = 50.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        TabItem(
+            modifier = Modifier.weight(1f),
+            label = "thoughts",
+            count = profileInfo["thoughts"]?.toString(),
+            isSelected = selectedTab == "thoughts",
+            onClick = { onSelectTab("thoughts") }
+        )
+        TabItem(
+            modifier = Modifier.weight(1f),
+            label = "loved",
+            isSelected = selectedTab == "loved",
+            onClick = { onSelectTab("loved") }
+        )
+        TabItem(
+            modifier = Modifier.weight(1f),
+            label = "mentions",
+            isSelected = selectedTab == "mentioned",
+            onClick = { onSelectTab("mentioned") }
+        )
+    }
+}
+
+@Composable
+fun TabItem(
+    modifier: Modifier = Modifier,
+    label: String,
+    count: String? = null,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+
+    Box(
+        modifier = modifier
+            .clickable { onClick() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+                .align(Alignment.Center),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (count != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = label,
+                        fontSize = 18.sp,
+                        color = Color(229, 231, 235)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = count.let { formatNumber(it.toInt()) },
+                        fontSize = 18.sp,
+                        color = Color(229, 231, 235)
+                    )
+                }
+            } else {
+                Text(
+                    text = label,
+                    fontSize = 18.sp,
+                    color = Color(229, 231, 235)
+                )
+            }
+        }
+
+        // Bottom border (2dp thick)
+        if (isSelected) {
+            HorizontalDivider(
+                thickness = 2.dp,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(2.dp),
+                color = Color(7, 89, 133) // Sky-400
+            )
+        }
     }
 }
 
