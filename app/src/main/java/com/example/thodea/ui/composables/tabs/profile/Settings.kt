@@ -1,7 +1,6 @@
 package com.example.thodea.ui.composables.tabs.profile
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -84,11 +83,6 @@ fun FirstRowLayout(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = 4.dp,
-                color = Color.Gray,
-                shape = RoundedCornerShape(4.dp)
-            )
             .padding(16.dp),
     ) {
         BackButton(onClick = onBack)
