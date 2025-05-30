@@ -48,14 +48,15 @@ import com.example.thodea.R
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen()
+    ProfileScreen({})
 }
 
 val profileInfo = ProfileInfo(followers = 1200, following = 256)
 
 
 @Composable
-fun ProfileScreen() {
+fun ProfileScreen(    onNavigateToSettings: () -> Unit
+) {
     var selectedTab by remember { mutableStateOf("thoughts") }
 
     Scaffold(
@@ -67,6 +68,7 @@ fun ProfileScreen() {
                 .padding(paddingValues)
         ) {
             FirstRowLayout(
+                onNavigateToSettings = onNavigateToSettings,
                 selectedTab = selectedTab,
                 onSelectTab = { tab -> selectedTab = tab },
                 profileInfo = profileInfo,
@@ -90,7 +92,8 @@ fun FirstRowLayout(
     onSelectTab: (String) -> Unit,
     profileInfo: ProfileInfo?,
     onFollowersClick: () -> Unit,
-    onFollowingClick: () -> Unit
+    onFollowingClick: () -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
 
     Column(
@@ -111,7 +114,7 @@ fun FirstRowLayout(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clickable(onClick = { })
+                        .clickable(onClick = onNavigateToSettings)
                 ) {
                     // SVG icon - you'll need to add the vector asset to your project
                     Icon(

@@ -9,6 +9,7 @@ import com.example.thodea.ui.composables.tabs.FeedScreen
 import com.example.thodea.ui.composables.tabs.PostScreen
 import com.example.thodea.ui.composables.tabs.ProfileScreen
 import com.example.thodea.ui.composables.tabs.SearchScreen
+import com.example.thodea.ui.composables.tabs.profile.SettingsScreen
 
 /**
  * Composable function that defines the navigation screens and their corresponding destinations.
@@ -29,6 +30,16 @@ fun NavigationScreens(navController: NavHostController) {
         }
         composable(NavItem.Feed.path) { FeedScreen() }
         composable(NavItem.Search.path) { SearchScreen() }
-        composable(NavItem.Profile.path) { ProfileScreen() }
+        composable(NavItem.Profile.path) { ProfileScreen(
+            onNavigateToSettings = {
+                navController.navigate(NavItem.Settings.path)
+            }
+        ) }
+        // Add this new composable for Settings
+        composable(NavItem.Settings.path) {
+            SettingsScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
     }
 }
