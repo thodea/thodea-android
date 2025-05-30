@@ -16,4 +16,10 @@ sealed class NavItem(
     object Settings : NavItem(
         path = "settings"
     )
+    object Chats : NavItem(
+        path = "chats"
+    )
+    object ChatRequests : NavItem(
+        path = "chat requests"
+    )
 }
