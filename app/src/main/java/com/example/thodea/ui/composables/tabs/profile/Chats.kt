@@ -1,10 +1,14 @@
 package com.example.thodea.ui.composables.tabs.profile
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -93,5 +97,51 @@ fun ChatsRowLayout(onBack: () -> Unit,onNavigateToChatRequests: () -> Unit) {
     ) {
         BackSettingsButton(onClick = onBack, onNavigateToChatRequests = onNavigateToChatRequests)
         Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(8.dp) // 8dp space between items
+        ) {
+            Chat()
+        }
+    }
+}
+
+@Composable
+fun Chat() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp)) // Clip to rounded corners
+            .border(
+                width = 1.dp,
+                color = Color(31, 41, 55),
+                shape = RoundedCornerShape(8.dp) // Border with same rounded shape
+            )
+            .padding(2.dp), // optional: add padding inside
+
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column( modifier = Modifier.padding(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Row {
+                    Box(
+                        modifier = Modifier
+                            .width(24.dp) // Take remaining space in the Column
+                            .aspectRatio(1f) // Make it square
+                            .clip(RoundedCornerShape(4.dp)) // Rounded corners
+                            .background(Color(0x2260A5FA)) // Tailwind sky-400 style blue
+                    )
+                }
+                Text(text = "username", color = Color.Gray, fontSize = 16.sp,
+                    modifier = Modifier.padding(start = 8.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = "Date", color = Color.Gray)
+            }
+            Row(modifier = Modifier.padding(top = 10.dp)) {
+                Text(text = "Last message...", color = Color.Gray, fontSize = 16.sp)
+            }
+
+        }
     }
 }
