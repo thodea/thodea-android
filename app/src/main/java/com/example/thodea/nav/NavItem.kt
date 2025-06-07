@@ -22,4 +22,7 @@ sealed class NavItem(
     object ChatRequests : NavItem(
         path = "chat requests"
     )
+    object Chat : NavItem(
+        path = "chat"
+    )
 }
