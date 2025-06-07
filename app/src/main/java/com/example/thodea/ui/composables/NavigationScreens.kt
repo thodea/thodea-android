@@ -10,6 +10,7 @@ import com.example.thodea.ui.composables.tabs.PostScreen
 import com.example.thodea.ui.composables.tabs.ProfileScreen
 import com.example.thodea.ui.composables.tabs.SearchScreen
 import com.example.thodea.ui.composables.tabs.profile.ChatRequestsScreen
+import com.example.thodea.ui.composables.tabs.profile.ChatScreen
 import com.example.thodea.ui.composables.tabs.profile.ChatsScreen
 import com.example.thodea.ui.composables.tabs.profile.SettingsScreen
 
@@ -50,6 +51,9 @@ fun NavigationScreens(navController: NavHostController) {
                 onBack = { navController.popBackStack() },
                 onNavigateToChatRequests = {
                     navController.navigate(NavItem.ChatRequests.path)
+                },
+                onNavigateToChat = {
+                    navController.navigate(NavItem.Chat.path)
                 }
             )
         }
@@ -57,6 +61,11 @@ fun NavigationScreens(navController: NavHostController) {
             ChatRequestsScreen(
                 onBack = { navController.popBackStack() }
             )
+        }
+        composable(NavItem.Chat.path) {
+            ChatScreen(
+                onBack = { navController.popBackStack() }
+            ) // your actual ChatScreen composable
         }
     }
 }

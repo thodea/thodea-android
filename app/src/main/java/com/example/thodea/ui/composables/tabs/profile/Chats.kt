@@ -2,6 +2,7 @@ package com.example.thodea.ui.composables.tabs.profile
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -20,11 +21,11 @@ import com.example.thodea.R
 @Preview(showBackground = true)
 @Composable
 fun ChatsScreenPreview() {
-    ChatsScreen(onBack = {}, onNavigateToChatRequests = {})
+    ChatsScreen(onBack = {}, onNavigateToChatRequests = {}, onNavigateToChat = {})
 }
 
 @Composable
-fun ChatsScreen(onBack: () -> Unit,onNavigateToChatRequests: () -> Unit) {
+fun ChatsScreen(onBack: () -> Unit,onNavigateToChatRequests: () -> Unit, onNavigateToChat: () -> Unit) {
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827)
     )  { paddingValues ->
@@ -33,7 +34,7 @@ fun ChatsScreen(onBack: () -> Unit,onNavigateToChatRequests: () -> Unit) {
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            ChatsRowLayout(onBack = onBack, onNavigateToChatRequests = onNavigateToChatRequests)
+            ChatsRowLayout(onBack = onBack, onNavigateToChatRequests = onNavigateToChatRequests, onNavigateToChat = onNavigateToChat)
         }
     }
 }
@@ -89,7 +90,7 @@ fun BackSettingsButton(onClick: () -> Unit, onNavigateToChatRequests: () -> Unit
 }
 
 @Composable
-fun ChatsRowLayout(onBack: () -> Unit,onNavigateToChatRequests: () -> Unit) {
+fun ChatsRowLayout(onBack: () -> Unit,onNavigateToChatRequests: () -> Unit, onNavigateToChat: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -101,13 +102,13 @@ fun ChatsRowLayout(onBack: () -> Unit,onNavigateToChatRequests: () -> Unit) {
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(8.dp) // 8dp space between items
         ) {
-            Chat()
+            Chat(onNavigateToChat = onNavigateToChat)
         }
     }
 }
 
 @Composable
-fun Chat() {
+fun Chat(onNavigateToChat: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -117,7 +118,8 @@ fun Chat() {
                 color = Color(31, 41, 55),
                 shape = RoundedCornerShape(8.dp) // Border with same rounded shape
             )
-            .padding(2.dp), // optional: add padding inside
+            .padding(2.dp)
+            .clickable(onClick = onNavigateToChat), // optional: add padding inside
 
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
