@@ -1,12 +1,14 @@
 package com.example.thodea.ui.composables.tabs.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +23,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -70,8 +77,13 @@ fun ChatScreen(
                 //onNavigateBackToChats = onNavigateBackToChats,
                 messages = messages,
                 onSendMessage = { message ->
-                    val newMessage = ChatMessage("Me", message, Date())
-                    messages = messages + newMessage
+                    val trimmedMessage = message.trim()
+                    if (trimmedMessage.isNotEmpty()) { // <--- Add this check
+                        val newMessage = ChatMessage("Me", trimmedMessage, Date())
+                        messages = messages + newMessage
+                        inputText = ""
+                    }
+                    // If trimmedMessage is empty, nothing happens, effectively preventing sending.
                 },
                 textValue = inputText,
                 onTextChange = { inputText = it }
@@ -85,28 +97,46 @@ fun ChatTopRow(onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(30.dp),
+            .height(32.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically,modifier = Modifier) {
+        // Left-Aligned Back Icon
             IconButton(
                 onClick = onClick,
                 modifier = Modifier
-                    .height(24.dp)
+                    .height(34.dp)
+                    .offset(x = (-8).dp)
+                    .padding(0.dp)
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_back),
+                    contentDescription = "Back",
+                    tint = Color(0xFF075985),
+                    modifier = Modifier.size(30.dp)
+                )
+            }
+
+            IconButton(
+                onClick = {},
+                modifier = Modifier
+                    .height(32.dp)
                     .padding(0.dp)
                     .offset(x = (-12).dp)
+                    .clip(RoundedCornerShape(4.dp))
+
 
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .width(24.dp)
+                            .width(28.dp)
                             .aspectRatio(1f)
                             .clip(RoundedCornerShape(4.dp))
                             .background(Color(0x2260A5FA))
                     )
                 }
             }
-            Text(text = "username", color = Color.Gray, fontSize = 16.sp,
+            Text(text = "username", color = Color.Gray, fontSize = 18.sp,
                 modifier = Modifier.offset(x = (-16).dp)
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -139,6 +169,23 @@ fun ChatMainLayout(
     onTextChange: (String) -> Unit
 ) {
     //var input by remember { mutableStateOf("") }
+    var isLengthExceeded by remember { mutableStateOf(false) }
+    var showPasteError by remember { mutableStateOf(false) }
+
+    // Whenever showPasteError becomes true, auto-dismiss after 2 seconds
+    LaunchedEffect(showPasteError) {
+        if (showPasteError) {
+            delay(2.seconds)
+            showPasteError = false
+        }
+    }
+
+    LaunchedEffect(isLengthExceeded) {
+        if (isLengthExceeded) {
+            delay(2.seconds)
+            isLengthExceeded = false
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -178,6 +225,24 @@ fun ChatMainLayout(
                 }
             }
 
+            // Show red box warning if text exceeds 1000 chars
+            if (isLengthExceeded || showPasteError) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(26.dp)
+                        .background(Color(0xFFFCA5A5)) // Equivalent to bg-red-300
+                ) {
+                    Text(
+                        text = "1000 char limit",
+                        color = Color.Black,
+                        modifier = Modifier.align(Alignment.Center),
+                        fontWeight = FontWeight.Medium,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
             // Input field at the bottom
             Row(
                 modifier = Modifier
@@ -204,7 +269,14 @@ fun ChatMainLayout(
                 BasicTextField(
                     maxLines = 7,
                     value = textValue,
-                    onValueChange = onTextChange,
+                    onValueChange = { newText ->
+                        if (newText.length <= 1000) {
+                            onTextChange(newText)
+                        } else {
+                            // Show error if pasted text would exceed 1000
+                            showPasteError = true
+                        }
+                    },
                     modifier = Modifier
                         .weight(1f) // Takes remaining space
                         .drawBehind {
@@ -278,7 +350,6 @@ fun ChatMessageItem(
 
     val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val formattedDate = dateFormat.format(date)
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -288,8 +359,16 @@ fun ChatMessageItem(
         Box(
             modifier = Modifier
                 .fillMaxWidth(0.8f)
+                .shadow(
+                    elevation = 2.dp, // Elevation of the shadow
+                    shape = RoundedCornerShape(8.dp), // Shape of the shadow
+                    clip = false, // If true, content will be clipped to shape
+                    ambientColor = Color.Black.copy(alpha = 1f), // Color of the ambient shadow
+                    spotColor = Color.Black.copy(alpha = 0.5f) // Color of the spot shadow
+                )
                 .background(backgroundColor, shape = RoundedCornerShape(8.dp))
                 .padding(8.dp)
+
         ) {
             Column {
                 Text(
@@ -299,13 +378,40 @@ fun ChatMessageItem(
                 )
             }
         }
-        Text(
-            text = formattedDate,
-            color = Color.Gray,
-            fontSize = 12.sp,
+
+        // Use a Row for date and "nav" text
+        Row(
             modifier = Modifier
-                .padding(top = 6.dp)
-                .offset(x = if (isCurrentUser) 0.dp else 4.dp)
-        )
+                .padding(top = 2.dp)
+                // Adjust alignment based on current user for the entire row
+                .align(if (isCurrentUser) Alignment.End else Alignment.Start),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically // Vertically align items in the row
+        ) {
+            Text(
+                text = formattedDate,
+                color = Color.Gray,
+                lineHeight = 24.sp,
+                fontSize = 12.sp,
+                modifier = Modifier.offset(x = if (isCurrentUser) 0.dp else 4.dp)
+            )
+
+            // Conditionally show "nav" text only for the current user
+            if (isCurrentUser) {
+                Box(
+                    modifier = Modifier
+                        .clickable(onClick = { /* Handle click */ }) // Make the Box clickable
+                        .padding(start = 4.dp) // Add your custom, smaller padding to the Box
+                ) {
+                    Icon(
+                        // painter = painterResource(id = R.drawable.ic_msg_delete), // Your actual icon
+                        painter = painterResource(id = R.drawable.ic_msg_delete),
+                        contentDescription = "Msg delete",
+                        tint = Color(0xFF6b7280),
+                        modifier = Modifier.size(24.dp) // Size of the icon itself
+                    )
+                }
+            }
+        }
     }
 }
