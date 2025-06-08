@@ -10,6 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -109,41 +113,61 @@ fun ChatsRowLayout(onBack: () -> Unit,onNavigateToChatRequests: () -> Unit, onNa
 
 @Composable
 fun Chat(onNavigateToChat: () -> Unit) {
-    Row(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp)) // Clip to rounded corners
-            .border(
-                width = 1.dp,
-                color = Color(31, 41, 55),
-                shape = RoundedCornerShape(8.dp) // Border with same rounded shape
-            )
-            .padding(2.dp)
-            .clickable(onClick = onNavigateToChat), // optional: add padding inside
+            .padding(bottom = 8.dp) // give space for the shadow
+            .drawBehind {
+                val shadowHeight = 16.dp.toPx()
+                val cornerRadius = 8.dp.toPx()
 
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+                drawRoundRect(
+                    color = Color.Black.copy(alpha = 0.2f),
+                    topLeft = Offset(0f, size.height - shadowHeight / 2 - 14), // offset upward
+                    size = Size(size.width, shadowHeight),
+                    cornerRadius = CornerRadius(cornerRadius, cornerRadius)
+                )
+            }
     ) {
-        Column( modifier = Modifier.padding(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Row {
-                    Box(
-                        modifier = Modifier
-                            .width(24.dp) // Take remaining space in the Column
-                            .aspectRatio(1f) // Make it square
-                            .clip(RoundedCornerShape(4.dp)) // Rounded corners
-                            .background(Color(0x2260A5FA)) // Tailwind sky-400 style blue
-                    )
-                }
-                Text(text = "username", color = Color.Gray, fontSize = 16.sp,
-                    modifier = Modifier.padding(start = 8.dp))
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = "Date", color = Color.Gray)
-            }
-            Row(modifier = Modifier.padding(top = 10.dp)) {
-                Text(text = "Last message...", color = Color.Gray, fontSize = 16.sp)
-            }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF111827)) // Set the actual background color first
+                .clip(RoundedCornerShape(8.dp)) // Clip the content
+                .border(
+                    width = 1.dp,
+                    color = Color(31, 41, 55),
+                    shape = RoundedCornerShape(8.dp) // Border with same rounded shape
+                )
+                .padding(2.dp)
+                .clickable(onClick = onNavigateToChat), // optional: add padding inside
 
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.padding(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row {
+                        Box(
+                            modifier = Modifier
+                                .width(24.dp) // Take remaining space in the Column
+                                .aspectRatio(1f) // Make it square
+                                .clip(RoundedCornerShape(4.dp)) // Rounded corners
+                                .background(Color(0x2260A5FA)) // Tailwind sky-400 style blue
+                        )
+                    }
+                    Text(
+                        text = "username", color = Color.Gray, fontSize = 16.sp,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = "Date", color = Color.Gray)
+                }
+                Row(modifier = Modifier.padding(top = 10.dp)) {
+                    Text(text = "Last message...", color = Color.Gray, fontSize = 16.sp)
+                }
+
+            }
         }
     }
 }

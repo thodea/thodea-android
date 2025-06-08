@@ -26,7 +26,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -185,9 +189,26 @@ fun MostFollowedLabel() {
 
 @Composable
 fun Thought() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp) // give space for the shadow
+            .drawBehind {
+                val shadowHeight = 16.dp.toPx()
+                val cornerRadius = 8.dp.toPx()
+
+                drawRoundRect(
+                    color = Color.Black.copy(alpha = 0.2f),
+                    topLeft = Offset(0f, size.height - shadowHeight / 2 - 12), // offset upward
+                    size = Size(size.width, shadowHeight),
+                    cornerRadius = CornerRadius(cornerRadius, cornerRadius)
+                )
+            }
+    ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .background(Color(0xFF111827)) // Set the actual background color first
             .clip(RoundedCornerShape(8.dp)) // Clip to rounded corners
             .border(
                 width = 1.dp,
@@ -264,4 +285,5 @@ fun Thought() {
             }
         }
     }
+        }
 }
