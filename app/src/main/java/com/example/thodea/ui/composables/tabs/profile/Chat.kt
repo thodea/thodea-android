@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 import java.text.SimpleDateFormat
@@ -38,7 +39,8 @@ import java.util.Locale
 data class ChatMessage(
     val username: String,
     val message: String,
-    val date: Date
+    val date: Date,
+    val id: Int
 )
 
 @Preview(showBackground = true)
@@ -52,17 +54,25 @@ fun ChatScreen(
     onBack: () -> Unit,
     //onNavigateBackToChats: () -> Unit
 ) {
+
     // Example list of messages - in real usage, use a ViewModel!
     var messages by remember {
         mutableStateOf(
             listOf(
-                ChatMessage("Me", "Hello!", Date()),
-                ChatMessage("User123", "How are you?", Date()),
-                ChatMessage("Me", "I’m fine!", Date())
+                ChatMessage("Me", "Hello!\nm", Date(), 1),
+                ChatMessage("User123", "How are you?", Date(), 2),
+                ChatMessage("Me", "I’m fine!", Date(), 3)
             )
         )
     }
+    var openDeleteId by remember { mutableStateOf<String?>(null) }
     var inputText by remember { mutableStateOf("") }
+
+    // ⭐️ Function to delete message by ID
+    fun deleteMessageById(id: String) {
+        messages = messages.filter { it.id.toString() != id }
+        openDeleteId = null // close the delete button after deletion
+    }
 
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background
@@ -79,11 +89,23 @@ fun ChatScreen(
                 onSendMessage = { message ->
                     val trimmedMessage = message.trim()
                     if (trimmedMessage.isNotEmpty()) { // <--- Add this check
-                        val newMessage = ChatMessage("Me", trimmedMessage, Date())
+                        val newId = (messages.maxOfOrNull { it.id } ?: 0) + 1
+                        val newMessage = ChatMessage("Me", trimmedMessage, Date(), newId)
                         messages = messages + newMessage
                         inputText = ""
                     }
                     // If trimmedMessage is empty, nothing happens, effectively preventing sending.
+                },
+                openDeleteId = openDeleteId,
+                // ⭐️ Toggle the delete button for a given message
+                onDelete = { messageId ->
+                    if (openDeleteId == messageId) {
+                        // Delete the message if the delete button is already open
+                        deleteMessageById(messageId)
+                    } else {
+                        // Otherwise, show the delete button
+                        openDeleteId = messageId
+                    }
                 },
                 textValue = inputText,
                 onTextChange = { inputText = it }
@@ -165,7 +187,9 @@ fun ChatMainLayout(
     //onNavigateToChat: () -> Unit,
     messages: List<ChatMessage>, // Example list of messages
     onSendMessage: (String) -> Unit,
+    onDelete: (String) -> Unit,
     textValue: String,
+    openDeleteId: String?,
     onTextChange: (String) -> Unit
 ) {
     //var input by remember { mutableStateOf("") }
@@ -220,7 +244,10 @@ fun ChatMainLayout(
                     ChatMessageItem(
                         message = chatMessage.message,
                         date = chatMessage.date,
-                        isCurrentUser = isCurrentUser
+                        isCurrentUser = isCurrentUser,
+                        onDelete = onDelete,
+                        openDeleteId = openDeleteId,
+                        messageId = chatMessage.id,
                     )
                 }
             }
@@ -338,9 +365,12 @@ fun ChatMainLayout(
 
 @Composable
 fun ChatMessageItem(
+    messageId: Int,
     message: String,
     date: Date,
-    isCurrentUser: Boolean
+    isCurrentUser: Boolean,
+    openDeleteId: String?,
+    onDelete: (String) -> Unit
 ) {
     val backgroundColor = if (isCurrentUser) {
         Color(23, 37, 84)
@@ -350,6 +380,7 @@ fun ChatMessageItem(
 
     val dateFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
     val formattedDate = dateFormat.format(date)
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -360,33 +391,47 @@ fun ChatMessageItem(
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .shadow(
-                    elevation = 2.dp, // Elevation of the shadow
-                    shape = RoundedCornerShape(8.dp), // Shape of the shadow
-                    clip = false, // If true, content will be clipped to shape
-                    ambientColor = Color.Black.copy(alpha = 1f), // Color of the ambient shadow
-                    spotColor = Color.Black.copy(alpha = 0.5f) // Color of the spot shadow
+                    elevation = 2.dp,
+                    shape = RoundedCornerShape(8.dp),
+                    clip = false,
+                    ambientColor = Color.Black.copy(alpha = 1f),
+                    spotColor = Color.Black.copy(alpha = 0.5f)
                 )
                 .background(backgroundColor, shape = RoundedCornerShape(8.dp))
                 .padding(8.dp)
-
         ) {
-            Column {
+            // Message text
+            Text(
+                text = message,
+                color = Color.White,
+                fontSize = 16.sp
+            )
+
+            // Floating Delete button (absolute-like)
+            if (isCurrentUser && openDeleteId == messageId.toString()) {
+            //if (true) {
                 Text(
-                    text = message,
-                    color = Color.White,
-                    fontSize = 16.sp
+                    text = "Delete",
+                    color = Color.Black,
+                    fontSize = 14.sp,
+                    lineHeight = 14.sp,
+                    modifier = Modifier
+                        .background(Color(0xFFe0e0e0), shape = RoundedCornerShape(4.dp))
+                        .padding(horizontal = 8.dp, vertical = 1.dp)
+                        .align(Alignment.BottomEnd) // ⭐️ changed from TopEnd to BottomEnd
+                        .clickable { onDelete(messageId.toString()) }
+                        .zIndex(1f)
                 )
             }
         }
 
-        // Use a Row for date and "nav" text
+        // Date and icon row
         Row(
             modifier = Modifier
                 .padding(top = 2.dp)
-                // Adjust alignment based on current user for the entire row
                 .align(if (isCurrentUser) Alignment.End else Alignment.Start),
             horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically // Vertically align items in the row
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = formattedDate,
@@ -396,21 +441,23 @@ fun ChatMessageItem(
                 modifier = Modifier.offset(x = if (isCurrentUser) 0.dp else 4.dp)
             )
 
-            // Conditionally show "nav" text only for the current user
+            // Only for current user: delete icon
             if (isCurrentUser) {
-                Box(
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_msg_delete),
+                    contentDescription = "Delete icon",
+                    tint = Color(0xFF6b7280),
                     modifier = Modifier
-                        .clickable(onClick = { /* Handle click */ }) // Make the Box clickable
-                        .padding(start = 4.dp) // Add your custom, smaller padding to the Box
-                ) {
-                    Icon(
-                        // painter = painterResource(id = R.drawable.ic_msg_delete), // Your actual icon
-                        painter = painterResource(id = R.drawable.ic_msg_delete),
-                        contentDescription = "Msg delete",
-                        tint = Color(0xFF6b7280),
-                        modifier = Modifier.size(24.dp) // Size of the icon itself
-                    )
-                }
+                        .size(24.dp)
+                        .clickable {
+                            if (openDeleteId == messageId.toString()) {
+                                onDelete("") // close
+                            } else {
+                                onDelete(messageId.toString()) // open
+                            }
+                        }
+                        .padding(start = 4.dp)
+                )
             }
         }
     }
