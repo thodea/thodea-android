@@ -25,6 +25,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -48,6 +49,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import com.example.thodea.R
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Composable
 fun PostScreen(
@@ -96,7 +99,7 @@ fun ThreeRowLayout(
     ) {
         // Row 1: Hidden Text (left) and Button (right)
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().padding(top = 14.dp, bottom = 0.dp).height(38.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -179,14 +182,39 @@ fun ThreeRowLayout(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        var isLengthExceeded by remember { mutableStateOf(false) }
+        var showPasteError by remember { mutableStateOf(false) }
+
+        // Whenever showPasteError becomes true, auto-dismiss after 2 seconds
+        LaunchedEffect(showPasteError) {
+            if (showPasteError) {
+                delay(2.seconds)
+                showPasteError = false
+            }
+        }
+
+        LaunchedEffect(isLengthExceeded) {
+            if (isLengthExceeded) {
+                delay(2.seconds)
+                isLengthExceeded = false
+            }
+        }
+
         // Row 2: Input Text Field
         BasicTextField(
             maxLines = 7,
             value = textValue,
-            onValueChange = onTextChange,
+            onValueChange = { newText ->
+                if (newText.length <= 3000) { // Limit text input to 3000
+                    onTextChange(newText)
+                } else {
+                    // Show error if pasted text would exceed 1000
+                    showPasteError = true
+                }
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 8.dp) // This adds space below the text (before the border)
+                .padding(bottom = 2.dp) // This adds space below the text (before the border)
                 .drawBehind {
                     // Draw only the bottom border
                     val strokeWidth = 1.dp.toPx()
@@ -225,9 +253,12 @@ fun ThreeRowLayout(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Row 3: Media input
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        Box(
+            contentAlignment = Alignment.Center,
+            //horizontalArrangement = Arrangement.Center,
+            //verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier
+                .fillMaxWidth()
                 .clickable(onClick = { } )
                 .padding(end = 32.dp) // pr-8 in Tailwind (8 * 4 = 32)
         ) {
@@ -239,7 +270,18 @@ fun ThreeRowLayout(
                 modifier = Modifier
                     .width(24.dp)
                     .height(24.dp)
+                    .align(Alignment.CenterStart)
             )
+
+            if (isLengthExceeded || showPasteError) {
+                Text(
+                    text = "3000 char limit",
+                    color = Color(0xFFBE5A5A), // text-red-500
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier
+                )
+            }
+
         }
 
 
@@ -253,7 +295,7 @@ fun ThreeRowLayout(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(40.dp)
-                    .padding(top = 8.dp)
+                    .padding(top = 2.dp)
                     .shadow(
                         elevation = 4.dp,
                         shape = RoundedCornerShape(8.dp),
