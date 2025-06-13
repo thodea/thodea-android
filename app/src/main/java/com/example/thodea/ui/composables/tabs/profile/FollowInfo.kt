@@ -37,14 +37,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.thodea.R
 
+enum class FollowType {
+    FOLLOWERS,
+    FOLLOWING
+}
+
 @Preview(showBackground = true)
 @Composable
 fun FollowInfoScreenPreview() {
-    FollowInfoScreen(onBack = {})
+    FollowInfoScreen(followType = FollowType.FOLLOWERS, onBack = {})
 }
 
 @Composable
-fun FollowInfoScreen(onBack: () -> Unit) {
+fun FollowInfoScreen(followType: FollowType, onBack: () -> Unit) {
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827)
     )  { paddingValues ->
@@ -57,7 +62,7 @@ fun FollowInfoScreen(onBack: () -> Unit) {
                 .fillMaxSize().padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                FirstRowFollowInfoLayout(onBack = onBack)
+                FirstRowFollowInfoLayout(followType = followType, onBack = onBack)
                 Spacer(modifier = Modifier.height(8.dp))
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -72,7 +77,7 @@ fun FollowInfoScreen(onBack: () -> Unit) {
 
 
 @Composable
-fun FollowInfoBackButton(onClick: () -> Unit) {
+fun FollowInfoBackButton(followType: FollowType, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -106,7 +111,10 @@ fun FollowInfoBackButton(onClick: () -> Unit) {
         )
 
         Text(
-            text = " /followers",
+            text = when (followType) {
+                FollowType.FOLLOWERS -> " /followers"
+                FollowType.FOLLOWING -> " /following"
+            },
             fontSize = 18.sp,
             color = Color(229, 231, 235),
             lineHeight = 20.sp,
@@ -117,12 +125,12 @@ fun FollowInfoBackButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun FirstRowFollowInfoLayout(onBack: () -> Unit) {
+fun FirstRowFollowInfoLayout(followType: FollowType, onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
     ) {
-        FollowInfoBackButton(onClick = onBack)
+        FollowInfoBackButton(followType = followType, onClick = onBack)
         Spacer(modifier = Modifier.height(8.dp))
     }
 }
