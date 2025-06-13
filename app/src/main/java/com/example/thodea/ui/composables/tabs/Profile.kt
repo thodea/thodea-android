@@ -39,6 +39,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.thodea.R
 
 /**
@@ -48,7 +49,12 @@ import com.example.thodea.R
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
-    ProfileScreen(onNavigateToSettings = {}, onNavigateToChats = {})
+    ProfileScreen(
+        onNavigateToSettings = {}, onNavigateToChats = {},
+        onNavigateToFollowers = {},
+        onNavigateToFollowing = {},
+        navController = {} as NavController,
+    )
 }
 
 val profileInfo = ProfileInfo(followers = 1200, following = 256)
@@ -56,9 +62,13 @@ val profileInfo = ProfileInfo(followers = 1200, following = 256)
 
 @Composable
 fun ProfileScreen(    onNavigateToSettings: () -> Unit,
-                      onNavigateToChats: () -> Unit
+                      onNavigateToChats: () -> Unit,
+                      onNavigateToFollowers: () -> Unit,
+                      onNavigateToFollowing: () -> Unit,
+                      navController: NavController,
 ) {
     var selectedTab by remember { mutableStateOf("thoughts") }
+    //val navController = rememberNavController()
 
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827)
@@ -74,14 +84,9 @@ fun ProfileScreen(    onNavigateToSettings: () -> Unit,
                 selectedTab = selectedTab,
                 onSelectTab = { tab -> selectedTab = tab },
                 profileInfo = profileInfo,
-                onFollowersClick = {
-                    // Handle followers click
-                    println("Followers clicked: ${profileInfo.followers}")
-                },
-                onFollowingClick = {
-                    // Handle following click
-                    println("Following clicked: ${profileInfo.following}")
-                })
+                onFollowersClick = onNavigateToFollowers,
+                onFollowingClick = onNavigateToFollowing,
+                navController = navController)
         }
     }
 }
@@ -97,6 +102,7 @@ fun FirstRowLayout(
     onFollowingClick: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToChats: () -> Unit,
+    navController: NavController
 ) {
 
     Column(
@@ -186,14 +192,16 @@ fun FirstRowLayout(
                     count = profileInfo?.followers,
                     label = if ((profileInfo?.followers ?: 0) == 1) "follower" else "followers",
                     enabled = (profileInfo?.followers ?: -1) > 0,
-                    onClick = onFollowersClick
+                    onClick = onFollowersClick,
+                    navController =navController,
                 )
 
                 ProfileStatRow(
                     count = profileInfo?.following,
                     label = "following",
                     enabled = (profileInfo?.following ?: -1) > 0,
-                    onClick = onFollowingClick
+                    onClick = onFollowingClick,
+                    navController =navController,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -247,8 +255,10 @@ fun ProfileStatRow(
     count: Int?,
     label: String,
     enabled: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    navController: NavController
 ) {
+
     val windowInfo = LocalWindowInfo.current
     val density = LocalDensity.current
 
@@ -276,7 +286,15 @@ fun ProfileStatRow(
     Row(
         modifier = interactionModifier
             .fillMaxWidth()
-            .height(48.dp),
+            .height(48.dp)
+            .clickable {
+                navController.navigate(
+                    if (label.contains("r", ignoreCase = true)) {
+                        "followInfo/FOLLOWERS"
+                    } else {
+                        "followInfo/FOLLOWING"
+                    }
+                )            },
         verticalAlignment = Alignment.CenterVertically,
     ) {
         // Text content
@@ -436,7 +454,7 @@ fun TabItem(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = count.let { formatNumber(it.toInt()) },
+                        text = formatNumber(count.toInt()),
                         fontSize = 18.sp,
                         color = Color(229, 231, 235)
                     )

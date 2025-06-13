@@ -1,5 +1,6 @@
 package com.example.thodea.nav
 import com.example.thodea.R
+import com.example.thodea.ui.composables.tabs.profile.FollowType
 
 sealed class NavItem(
     val path: String,
@@ -25,4 +26,7 @@ sealed class NavItem(
     object Chat : NavItem(
         path = "chat"
     )
+    object FollowInfo : NavItem("followInfo/{type}") {
+        fun createRoute(type: FollowType): String = "followInfo/${type.name}"
+    }
 }
