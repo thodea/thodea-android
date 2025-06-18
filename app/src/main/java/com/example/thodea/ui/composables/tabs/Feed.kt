@@ -3,6 +3,7 @@ package com.example.thodea.ui.composables.tabs
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,7 +75,16 @@ fun FeedScreen() {
                 Spacer(modifier = Modifier.height(8.dp))
                 MostFollowedLabel()
                 Spacer(modifier = Modifier.height(8.dp))
-                Thought()
+                Thought(
+                    username = "alice42",
+                    thoughtId = "abc123",
+                    //onThoughtClick = { id -> navController.navigate("comments/$id") },
+                    onThoughtClick = {  },
+                    onLoveClick = { id -> println("Loved thought: $id") },
+                    //onUsernameClick = { name -> navController.navigate("profile/$name") }
+                    onUsernameClick = { },
+                    borderSwitch = true,
+                )
             }
 
         }
@@ -188,102 +198,152 @@ fun MostFollowedLabel() {
 }
 
 @Composable
-fun Thought() {
+fun Thought(
+    username: String,
+    thoughtId: String,
+    onThoughtClick: (thoughtId: String) -> Unit,
+    onLoveClick: (thoughtId: String) -> Unit,
+    onUsernameClick: (username: String) -> Unit,
+    borderSwitch: Boolean
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp) // give space for the shadow
-            .drawBehind {
-                val shadowHeight = 16.dp.toPx()
-                val cornerRadius = 8.dp.toPx()
+            .padding(bottom = 8.dp)
+            .then(
+                if (borderSwitch) {
+                    Modifier.drawBehind {
+                        val shadowHeight = 16.dp.toPx()
+                        val cornerRadius = 8.dp.toPx()
 
-                drawRoundRect(
-                    color = Color.Black.copy(alpha = 0.2f),
-                    topLeft = Offset(0f, size.height - shadowHeight / 2 - 12), // offset upward
-                    size = Size(size.width, shadowHeight),
-                    cornerRadius = CornerRadius(cornerRadius, cornerRadius)
-                )
-            }
-    ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color(0xFF111827)) // Set the actual background color first
-            .clip(RoundedCornerShape(8.dp)) // Clip to rounded corners
-            .border(
-                width = 1.dp,
-                color = Color(31, 41, 55),
-                shape = RoundedCornerShape(8.dp) // Border with same rounded shape
+                        drawRoundRect(
+                            color = Color.Black.copy(alpha = 0.2f),
+                            topLeft = Offset(0f, size.height - shadowHeight / 2 - 12),
+                            size = Size(size.width, shadowHeight),
+                            cornerRadius = CornerRadius(cornerRadius, cornerRadius)
+                        )
+                    }
+                } else {
+                    Modifier
+                }
             )
-            .padding(2.dp), // optional: add padding inside
-
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column( modifier = Modifier.padding(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Row {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF111827))
+                .clip(RoundedCornerShape(8.dp))
+                .border(
+                    width = 1.dp,
+                    color = if (borderSwitch) Color(31, 41, 55) else Color.Transparent,
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .padding(2.dp)
+                .clickable(onClick = { onThoughtClick(thoughtId) }), // Whole container clickable
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(
+                modifier = Modifier
+                    .then(
+                        if (borderSwitch) Modifier.padding(6.dp) else Modifier
+                    )
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .width(24.dp) // Take remaining space in the Column
-                            .aspectRatio(1f) // Make it square
-                            .clip(RoundedCornerShape(4.dp)) // Rounded corners
-                            .background(Color(0x2260A5FA)) // Tailwind sky-400 style blue
+                            .width(24.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x2260A5FA))
+                    )
+
+                    Text(
+                        text = "username",
+                        color = Color.Gray,
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .clickable(onClick = {
+                                // Avoid propagating click to Thought
+                                onUsernameClick(username)
+                            })
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    if (borderSwitch) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_nav),
+                            contentDescription = "Image icon",
+                            tint = Color(0xFF9CA3AF),
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+
+                }
+
+                Row(modifier = Modifier.padding(top = 10.dp)) {
+                    Text(text = "Main text", color = Color.Gray, fontSize = 16.sp)
+                }
+
+                Row(
+                    modifier = Modifier.padding(top = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "Love",
+                        tint = Color(0xFF9ca3af),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .padding(top = 1.dp)
+                            .clickable(onClick = {
+                                // Only trigger love click
+                                onLoveClick(thoughtId)
+                            })
+                    )
+                    Text(
+                        text = "0",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_comment),
+                        contentDescription = "Comment",
+                        tint = Color(0xFF9ca3af),
+                        modifier = Modifier
+                            .size(24.dp)
+                            .padding(start = 8.dp, top = 2.dp)
+                    )
+                    Text(
+                        text = "0",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(start = 10.dp)
                     )
                 }
-                Text(text = "username", color = Color.Gray, fontSize = 16.sp,
-                    modifier = Modifier.padding(start = 8.dp))
-                Spacer(modifier = Modifier.weight(1f))
-                //Text(text = "navigation", color = Color.Gray)
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_nav), // Replace with your actual SVG
-                    contentDescription = "Image icon",
-                    tint = Color(0xFF9CA3AF), // Adjust color as needed
-                    modifier = Modifier
-                        .size(24.dp)
-                )
-            }
-            Row(modifier = Modifier.padding(top = 10.dp)) {
-                Text(text = "Main text", color = Color.Gray, fontSize = 16.sp)
-            }
-            Row(modifier = Modifier.padding(top = 8.dp),verticalAlignment = Alignment.CenterVertically) {
-                //Text(text = "Love", color = Color.Gray)
-                Icon(
-                    imageVector = Icons.Default.FavoriteBorder,                    contentDescription = "Image icon",
-                    tint = Color(0xFF9ca3af), // Adjust color as needed
-                    modifier = Modifier
-                        .size(18.dp).padding(top = 1.dp)
-                )
-                Text(text = "0", color = Color.Gray,
-                    modifier = Modifier.padding(start = 8.dp))
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_comment), // Replace with your actual SVG
-                    contentDescription = "Image icon",
-                    tint = Color(0xFF9ca3af), // Adjust color as needed
-                    modifier = Modifier
-                        .size(24.dp).padding(start = 8.dp, top = 2.dp)
-                )
-                //Text(text = "Comments", color = Color.Gray,
-                //    modifier = Modifier.padding(start = 8.dp))
-                Text(text = "0", color = Color.Gray,
-                    modifier = Modifier.padding(start = 10.dp))
 
-            }
-            Row(modifier = Modifier.padding(top = 4.dp),verticalAlignment = Alignment.CenterVertically) {
-                //Text(text = "Views", color = Color.Gray)
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_seen), // Replace with your actual SVG
-                    contentDescription = "Image icon",
-                    tint = Color(0xFF6b7280), // Adjust color as needed
-                    modifier = Modifier
-                        .size(18.dp).padding(top = 2.dp)
-                )
-                Text(text = "1", color = Color.Gray, fontSize = 14.sp,
-                    modifier = Modifier.padding(start = 4.dp))
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = "Date", color = Color.Gray)
+                Row(
+                    modifier = Modifier.padding(top = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_seen),
+                        contentDescription = "Seen",
+                        tint = Color(0xFF6b7280),
+                        modifier = Modifier.size(18.dp).padding(top = 2.dp)
+                    )
+                    Text(
+                        text = "1",
+                        color = Color.Gray,
+                        fontSize = 14.sp,
+                        modifier = Modifier.padding(start = 4.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = "Date", color = Color.Gray)
+                }
             }
         }
     }
-        }
 }
