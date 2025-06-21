@@ -7,9 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -41,6 +43,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.example.thodea.R
 
 /**
@@ -50,11 +53,12 @@ import com.example.thodea.R
 @Preview(showBackground = true)
 @Composable
 fun FeedScreenPreview() {
-    FeedScreen()
+    FeedScreen(
+        navController = {} as NavController)
 }
 
 @Composable
-fun FeedScreen() {
+fun FeedScreen(navController: NavController) {
 
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827)
@@ -79,7 +83,7 @@ fun FeedScreen() {
                     username = "alice42",
                     thoughtId = "abc123",
                     //onThoughtClick = { id -> navController.navigate("comments/$id") },
-                    onThoughtClick = {  },
+                    onThoughtClick = { navController.navigate("thought/$12") },
                     onLoveClick = { id -> println("Loved thought: $id") },
                     //onUsernameClick = { name -> navController.navigate("profile/$name") }
                     onUsernameClick = { },
@@ -283,9 +287,19 @@ fun Thought(
 
                 }
 
-                Row(modifier = Modifier.padding(top = 10.dp)) {
-                    Text(text = "Main text", color = Color.Gray, fontSize = 16.sp)
+                Row(modifier = Modifier.padding(top = 10.dp, bottom = 4.dp)) {
+                    Text(text = "Main text", color = Color(222, 220, 220, 255), fontSize = 16.sp)
                 }
+
+                ThoughtUrlDisplay(
+                    thought = Thought(
+                        id = "1",
+                        urlTitle = "Jetpack Compose Basics",
+                        urlDescription = "A modern toolkit for building native Android UIs.",
+                        createdAt = System.currentTimeMillis(),
+                        authorId = "user_123"
+                    )
+                )
 
                 Row(
                     modifier = Modifier.padding(top = 8.dp),
@@ -328,18 +342,31 @@ fun Thought(
                     modifier = Modifier.padding(top = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    Text(
+                        text = "1",
+                        color = Color.Gray,
+                        fontSize = 14.sp
+                    )
                     Icon(
                         painter = painterResource(id = R.drawable.ic_seen),
                         contentDescription = "Seen",
                         tint = Color(0xFF6b7280),
-                        modifier = Modifier.size(18.dp).padding(top = 2.dp)
+                        modifier = Modifier.size(18.dp).padding(top = 2.dp).padding(start = 4.dp)
                     )
+
+                    Spacer(modifier = Modifier.width(12.dp))
                     Text(
-                        text = "1",
+                        text = "0",
                         color = Color.Gray,
                         fontSize = 14.sp,
-                        modifier = Modifier.padding(start = 4.dp)
                     )
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_link),
+                        contentDescription = "Seen",
+                        tint = Color(0xFF6b7280),
+                        modifier = Modifier.size(18.dp).padding(top = 2.dp).padding(start = 4.dp)
+                    )
+
                     Spacer(modifier = Modifier.weight(1f))
                     Text(text = "Date", color = Color.Gray)
                 }
@@ -347,3 +374,61 @@ fun Thought(
         }
     }
 }
+
+@Composable
+fun ThoughtUrlDisplay(thought: Thought) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .padding(top = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (!thought.urlTitle.isNullOrEmpty() || !thought.urlDescription.isNullOrEmpty()) {
+            Column {
+                Box(
+                    modifier = Modifier
+                        .width(2.dp)
+                        .fillMaxHeight()
+                        .background(Color(0xFF1E3A8A), shape = RoundedCornerShape(2.dp)) // blue-950
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier
+                .then(
+                    if (!thought.urlTitle.isNullOrEmpty() || !thought.urlDescription.isNullOrEmpty()) {
+                        Modifier
+                            .padding(start = 4.dp)
+                            .fillMaxWidth()
+                    } else {
+                        Modifier.fillMaxWidth()
+                    }
+                )
+        ) {
+            thought.urlTitle?.let {
+                Text(
+                    text = it,
+                    maxLines = 1,
+                    color = Color.Gray
+                )
+            }
+            thought.urlDescription?.let {
+                Text(
+                    text = it,
+                    maxLines = 1,
+                    color = Color.Gray
+                )
+            }
+        }
+    }
+}
+
+data class Thought(
+    val id: String,
+    val urlTitle: String? = null,
+    val urlDescription: String? = null,
+    val createdAt: Long = System.currentTimeMillis(),
+    val authorId: String? = null
+)

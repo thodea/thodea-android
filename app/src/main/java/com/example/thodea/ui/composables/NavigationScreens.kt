@@ -18,6 +18,7 @@ import com.example.thodea.ui.composables.tabs.profile.ChatsScreen
 import com.example.thodea.ui.composables.tabs.profile.FollowInfoScreen
 import com.example.thodea.ui.composables.tabs.profile.FollowType
 import com.example.thodea.ui.composables.tabs.profile.SettingsScreen
+import com.example.thodea.ui.composables.tabs.profile.ThoughtCommentsScreen
 
 /***
 * Composable function that defines the navigation screens and their corresponding destinations.
@@ -45,7 +46,12 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
                 }
             })
         }
-        composable(NavItem.Feed.path) { FeedScreen() }
+        composable(NavItem.Feed.path) {
+            FeedScreen(
+                navController = navController
+            )
+        }
+
         composable(NavItem.Search.path) { SearchScreen() }
 
         // ProfileScreen is your primary screen for triggering follower/following navigation
@@ -92,6 +98,17 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
         }
         composable(NavItem.Chat.path) {
             ChatScreen(
+                onBack = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = NavItem.ThoughtComments.path,
+            arguments = listOf(navArgument("id") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val thoughtId = backStackEntry.arguments?.getString("id")
+            ThoughtCommentsScreen(
+                thoughtId = thoughtId ?: "",
                 onBack = { navController.popBackStack() }
             )
         }
