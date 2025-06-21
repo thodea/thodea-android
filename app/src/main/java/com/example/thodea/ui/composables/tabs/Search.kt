@@ -95,7 +95,13 @@ fun FirstRowLayout(
                 BasicTextField(
                     maxLines = 1,
                     value = textValue,
-                    onValueChange = onTextChange,
+                    onValueChange = {
+                        // Enforce 150-char limit and prevent manual newlines
+                        val sanitized = it.replace("\n", "")
+                        if (sanitized.length <= 150) {
+                            onTextChange(sanitized)
+                        }
+                    },
                     singleLine = true,
                     modifier = Modifier
                         .weight(1f)
