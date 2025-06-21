@@ -29,4 +29,7 @@ sealed class NavItem(
     object FollowInfo : NavItem("followInfo/{type}") {
         fun createRoute(type: FollowType): String = "followInfo/${type.name}"
     }
+    object ThoughtComments : NavItem("thought/{id}") {
+        //fun createRoute(id: String): String = "thought/$id"
+    }
 }
