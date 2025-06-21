@@ -53,12 +53,12 @@ import com.example.thodea.R
 @Preview(showBackground = true)
 @Composable
 fun FeedScreenPreview() {
-    FeedScreen(
-        navController = {} as NavController)
+    FeedScreen()
 }
 
+
 @Composable
-fun FeedScreen(navController: NavController) {
+fun FeedScreen(navController: NavController? = null) {
 
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827)
@@ -83,7 +83,9 @@ fun FeedScreen(navController: NavController) {
                     username = "alice42",
                     thoughtId = "abc123",
                     //onThoughtClick = { id -> navController.navigate("comments/$id") },
-                    onThoughtClick = { navController.navigate("thought/$12") },
+                    onThoughtClick = {
+                        navController?.navigate("thought/$12")
+                    },
                     onLoveClick = { id -> println("Loved thought: $id") },
                     //onUsernameClick = { name -> navController.navigate("profile/$name") }
                     onUsernameClick = { },

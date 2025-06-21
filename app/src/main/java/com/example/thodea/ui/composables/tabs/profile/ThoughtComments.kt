@@ -9,6 +9,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.thodea.R
 import com.example.thodea.ui.composables.tabs.Thought
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 
 @Preview(showBackground = true)
@@ -119,13 +122,33 @@ fun ThoughtCommentsRowLayout(onBack: () -> Unit,
         )
         Spacer(modifier = Modifier.height(2.dp))
 
+        var isLengthExceeded by remember { mutableStateOf(false) }
+        var showPasteError by remember { mutableStateOf(false) }
+
+        // Whenever showPasteError becomes true, auto-dismiss after 2 seconds
+        LaunchedEffect(showPasteError) {
+            if (showPasteError) {
+                delay(2.seconds)
+                showPasteError = false
+            }
+        }
+
+        LaunchedEffect(isLengthExceeded) {
+            if (isLengthExceeded) {
+                delay(2.seconds)
+                isLengthExceeded = false
+            }
+        }
+
         BasicTextField(
             value = textValue,
-            onValueChange = {
-                // Enforce 150-char limit and prevent manual newlines
-                val sanitized = it.replace("\n", "")
-                if (sanitized.length <= 150) {
+            onValueChange = { newText ->
+                val sanitized = newText.replace("\n", " ")
+                if (sanitized.length <= 150) { // Limit text input to 3000
                     onTextChange(sanitized)
+                } else {
+                    // Show error if pasted text would exceed 1000
+                    showPasteError = true
                 }
             },
             modifier = Modifier
@@ -187,6 +210,15 @@ fun ThoughtCommentsRowLayout(onBack: () -> Unit,
                     .height(24.dp)
                     .align(Alignment.CenterStart)
             )
+
+            if (isLengthExceeded || showPasteError) {
+                Text(
+                    text = "150 char limit",
+                    color = Color(0xFFBE5A5A), // text-red-500
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier
+                )
+            }
 
             Text(
                 text = "reset",
@@ -262,5 +294,127 @@ fun ThoughtCommentsRowLayout(onBack: () -> Unit,
             }
         }
 
+        Spacer(modifier = Modifier.height(2.dp))
+
+        var selectedTab by remember { mutableStateOf("recent") }
+
+        TabSelector(selectedTab = selectedTab, selectTab = { selectedTab = it })
+
+        Comment(
+            username = "john doe",
+            date = "2025-06-21",
+            comment = "This is a short comment." // or a long one to see dynamic growth
+        )
+    }
+}
+
+@Composable
+fun TabSelector(
+    selectedTab: String,
+    selectTab: (String) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 8.dp, bottom = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        val tabs = listOf("recent", "popular")
+
+        tabs.forEach { tab ->
+            val isSelected = selectedTab == tab
+            val borderColor = if (isSelected) Color(7, 89, 133)
+            else Color.Transparent
+            val textStyle = if (isSelected) {
+                MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+            } else {
+                MaterialTheme.typography.bodyMedium
+            }
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .clickable { selectTab(tab) }
+                    .padding(bottom = 8.dp) // Adds space between text and border
+                    .drawBehind {
+                        if (isSelected) {
+                            val strokeWidth = 2.dp.toPx()
+                            val y = size.height // Bottom edge
+                            drawLine(
+                                color = borderColor,
+                                start = Offset(0f, y),
+                                end = Offset(size.width, y),
+                                strokeWidth = strokeWidth
+                            )
+                        }
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = tab.replaceFirstChar { it.uppercase() },
+                    style = textStyle,
+                    fontSize = 16.sp,
+                    color = Color(238, 232, 232, 255),
+                    modifier = Modifier.padding(bottom = 4.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun Comment(username: String, date: String, comment: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .padding(bottom = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color(0xFF111827)) // Background
+                .padding(start = 4.dp)
+        ) {
+            // Left border
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .fillMaxHeight()
+                    .background(Color(0xFF1F2937))
+            )
+
+            Column(
+                modifier = Modifier
+                    .padding(6.dp)
+                    .fillMaxWidth()
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .width(24.dp)
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(Color(0x2260A5FA))
+                    )
+                    Text(
+                        text = username,
+                        color = Color.Gray,
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = date, color = Color.Gray)
+                }
+
+                Text(
+                    text = comment,
+                    color = Color.Gray,
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(top = 10.dp),
+                    softWrap = true // Wrap long comments naturally
+                )
+            }
+        }
     }
 }
