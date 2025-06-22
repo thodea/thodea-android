@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -75,7 +77,7 @@ fun BackThoughtCommentsButton(onClick: () -> Unit) {
         Text(
             fontSize = 22.sp,
             text = "Comments",
-            color = Color(229, 231, 235),
+            color = Color(147, 147, 147, 255),
             style = MaterialTheme.typography.titleMedium
         )
 
@@ -303,7 +305,9 @@ fun ThoughtCommentsRowLayout(onBack: () -> Unit,
         Comment(
             username = "john doe",
             date = "2025-06-21",
-            comment = "This is a short comment." // or a long one to see dynamic growth
+            comment = "This is a short comment.",
+            commentId = "123",// or a long one to see dynamic growth
+            onLoveClick = { id -> println("Loved comment: $id") }
         )
     }
 }
@@ -363,7 +367,9 @@ fun TabSelector(
 }
 
 @Composable
-fun Comment(username: String, date: String, comment: String) {
+fun Comment(username: String, date: String, comment: String,
+            commentId: String,
+            onLoveClick: (commentId: String) -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -374,14 +380,14 @@ fun Comment(username: String, date: String, comment: String) {
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color(0xFF111827)) // Background
-                .padding(start = 4.dp)
+                .padding(start = 0.dp)
         ) {
             // Left border
             Box(
                 modifier = Modifier
                     .width(2.dp)
                     .fillMaxHeight()
-                    .background(Color(0xFF1F2937))
+                    .background(Color(30, 58, 138))
             )
 
             Column(
@@ -404,16 +410,45 @@ fun Comment(username: String, date: String, comment: String) {
                         modifier = Modifier.padding(start = 8.dp)
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    Text(text = date, color = Color.Gray)
+                    //Text(text = date, color = Color.Gray)
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_nav),
+                        contentDescription = "Image icon",
+                        tint = Color(0xFF9CA3AF),
+                        modifier = Modifier.size(24.dp)
+                    )
                 }
 
                 Text(
                     text = comment,
-                    color = Color.Gray,
+                    color = Color(236, 230, 230, 255),
                     fontSize = 16.sp,
                     modifier = Modifier.padding(top = 10.dp),
                     softWrap = true // Wrap long comments naturally
                 )
+
+                Row(verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(top = 8.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "Love",
+                        tint = Color(0xFF9ca3af),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .padding(top = 1.dp)
+                            .clickable(onClick = {
+                                // Only trigger love click
+                                onLoveClick(commentId)
+                            })
+                    )
+                    Text(
+                        text = "0",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(text = date, color = Color.Gray)
+                }
             }
         }
     }
