@@ -1,0 +1,343 @@
+package com.example.thodea.ui.composables
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil3.compose.rememberAsyncImagePainter
+
+@Composable
+fun LoginScreen() {
+    // State to control whether the email confirmation message is shown
+    var emailSent by remember { mutableStateOf(false) }
+    // State to hold the email input value
+    var email by remember { mutableStateOf("") }
+
+    Scaffold(
+        containerColor = Color(0xFF111827) // Dark background (#111827) from original HTML
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues) // Apply Scaffold's padding to avoid overlap with system bars
+                .systemBarsPadding() // Ensures content adapts to system bars
+        ) {
+            // Conditionally display either the login form or the email sent confirmation
+            if (!emailSent) {
+                // Display the LoginForm component
+                FirstRowLoginLayout(
+                    email = email,
+                    onEmailChange = { email = it },
+                    onSignInGoogle = {  },
+                    onSignInMicrosoft = {  },
+                    onSignInYahoo = {  },
+                    onUserLogin = {
+                        // When user clicks 'Enter', simulate email sent and update state
+                        emailSent = true
+                        // Do: Add your actual user login API call here
+                        // For example: authViewModel.loginWithEmail(email)
+                    },
+                )
+            } else {
+                // Display the email confirmation message
+                //EmailSentConfirmation()
+                Text("here")
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun LoginScreenPreview() {
+    LoginScreen()
+}
+
+@Composable
+fun FirstRowLoginLayout(
+    email: String,
+    onEmailChange: (String) -> Unit, // This lambda will be called to update email in LoginScreen
+    onSignInGoogle: () -> Unit,
+    onSignInMicrosoft: () -> Unit,
+    onSignInYahoo: () -> Unit,
+    onUserLogin: () -> Unit, // This lambda will be called to update emailSent in LoginScreen
+) {
+    // This Column represents the main container for the login form elements.
+    // The padding from the original Next.js code is applied here.
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(start = 16.dp, end = 16.dp, top = 8.dp) // Adjusted to match original padding pl-4 pr-4 pt-2
+    ) {
+        // The original Next.js code had a Row containing the "Log In" text and then the LoginForm.
+        // Since LoginForm already includes the "Log In" text, we need to decide where it should be.
+        // If you want a separate "Log In" header *outside* the LoginForm's styled box,
+        // you would place it here. However, to match the original Next.js where "Log In"
+        // is *inside* the login box, we simply call LoginForm directly.
+
+        // Removed the redundant "Log In" text block from here:
+        // Row(
+        //     modifier = Modifier.padding(bottom = 4.dp).alpha(0.9f).border(
+        //         width = 1.dp,
+        //         color = Color(31, 41, 55),
+        //         shape = RoundedCornerShape(8.dp)
+        //     ).fillMaxWidth(),
+        //     horizontalArrangement = Arrangement.Center,
+        // ) {
+        //     Text(
+        //         text = "Log In",
+        //         fontSize = 28.sp,
+        //         fontWeight = FontWeight.SemiBold,
+        //         color = Color.White.copy(alpha = 0.8f),
+        //     )
+        // }
+        // Spacer(modifier = Modifier.width(8.dp)) // This spacer is also not needed here
+
+        // Now, the LoginForm is called directly. It contains its own "Log In" text and styling.
+        // All event handling and state updates are passed down from LoginScreen through this component.
+        LoginForm(
+            email = email,
+            onEmailChange = onEmailChange,
+            onSignInGoogle = onSignInGoogle,
+            onSignInMicrosoft = onSignInMicrosoft,
+            onSignInYahoo = onSignInYahoo,
+            onUserLogin = onUserLogin, // This will trigger the emailSent state update in LoginScreen
+        )
+    }
+}
+
+
+
+
+@Composable
+fun LoginForm(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    onSignInGoogle: () -> Unit,
+    onSignInMicrosoft: () -> Unit,
+    onSignInYahoo: () -> Unit,
+    onUserLogin: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentWidth(align = Alignment.CenterHorizontally)
+            .padding(bottom = 5.dp), // mx-auto equivalent
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Login Box
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+                .widthIn(max = 450.dp) // max-w-[450px]
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant, // dark:border-gray-600
+                    shape = RoundedCornerShape(8.dp)
+                )
+                .shadow(
+                    elevation = 8.dp, // shadow-lg
+                    shape = RoundedCornerShape(8.dp),
+                    ambientColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                    spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                )
+                .background(Color.Transparent) // Default background for the card
+                .padding(bottom = 4.dp)
+        ) {
+            Text(
+                text = "Log In",
+                fontSize = 22.sp, // text-2xl
+                color = Color.Gray, // text-blue-200
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp, horizontal = 4.dp) // p-2 pb-4
+            )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                horizontalArrangement = Arrangement.SpaceAround // justify-between
+            ) {
+                // Google Image
+                Image(
+                    painter = rememberAsyncImagePainter("[https://cdn.nikpevnev.com/assets/store/design/google.webp](https://cdn.nikpevnev.com/assets/store/design/google.webp)"),
+                    contentDescription = "Sign in with Google",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(50.dp) // w-[50px]
+                        .padding(4.dp) // m-4
+                        .clickable(onClick = onSignInGoogle)
+                )
+                // Microsoft Image
+                Image(
+                    painter = rememberAsyncImagePainter("[https://cdn.nikpevnev.com/assets/store/design/microsoft.webp](https://cdn.nikpevnev.com/assets/store/design/microsoft.webp)"),
+                    contentDescription = "Sign in with Microsoft",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(4.dp)
+                        .clickable(onClick = onSignInMicrosoft)
+                )
+                // Yahoo Image
+                Image(
+                    painter = rememberAsyncImagePainter("[https://cdn.nikpevnev.com/assets/store/design/yahoo.webp](https://cdn.nikpevnev.com/assets/store/design/yahoo.webp)"),
+                    contentDescription = "Sign in with Yahoo",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .padding(4.dp)
+                        .clickable(onClick = onSignInYahoo)
+                )
+            }
+
+            // "Or" Divider
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.outline
+                )
+                Text(
+                    text = "Or",
+                    modifier = Modifier.padding(horizontal = 8.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    color = MaterialTheme.colorScheme.outline
+                )
+            }
+
+            // Email Input
+            OutlinedTextField(
+                value = email,
+                onValueChange = onEmailChange,
+                label = { Text("Email") },
+                placeholder = { Text("Email", color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedBorderColor = Color.Blue, // dark:border-blue-900
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(80.dp) // approximate h-[40px] with label
+                    .padding(horizontal = 16.dp, vertical = 4.dp) // m-4
+            )
+
+
+            // Enter Button
+            Button(
+                onClick = onUserLogin,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(55.dp) // pt-1 pb-1 with text-2xl
+                    .padding(horizontal = 16.dp, vertical = 4.dp) // m-4
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(4.dp)), // shadow-md
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // Make button transparent to apply gradient
+                contentPadding = PaddingValues(0.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            brush = Brush.horizontalGradient(
+                                colors = listOf(Color.Blue, Color.Green) // from-[#c6f7ff] to-[#d5ffd5]
+                            ),
+                            shape = RoundedCornerShape(4.dp) // rounded-sm
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Enter",
+                        fontSize = 22.sp, // text-2xl
+                        color = MaterialTheme.colorScheme.onSurface // Adjust color for readability on gradient
+                    )
+                }
+            }
+        }
+
+        // Terms and Privacy Text
+        Row(
+            modifier = Modifier.padding(top = 16.dp), // mt-6
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "By entering you agree to ",
+                fontSize = 16.sp, // text-lg
+                color = Color.Gray // text-gray-500
+            )
+            val annotatedString = buildAnnotatedString {
+                withStyle(style = SpanStyle(color = Color.Blue, fontWeight = FontWeight.Medium)) {
+                    append("Terms of Use")
+                }
+                append(" and ")
+                withStyle(style = SpanStyle(color = Color.Blue, fontWeight = FontWeight.Medium)) {
+                    append("Privacy Policy")
+                }
+            }
+            Text(
+                text = annotatedString,
+                fontSize = 16.sp,
+                modifier = Modifier.clickable { /* Handle link clicks */ }
+            )
+        }
+
+
+    }
+}
