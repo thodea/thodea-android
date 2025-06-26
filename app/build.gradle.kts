@@ -44,6 +44,9 @@ android {
 }
 
 dependencies {
+
+    implementation(libs.coil.compose) // Or the latest stable version
+    implementation(libs.coil.network.okhttp)
     // Compose BOM (manages all versions for Compose libraries)
     implementation(platform(libs.androidx.compose.bom))
     // Jetpack Compose integration
