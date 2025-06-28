@@ -1,6 +1,5 @@
 package com.example.thodea.ui.composables
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,14 +46,26 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.rememberAsyncImagePainter
+import coil3.compose.AsyncImage
 
 @Composable
-fun LoginScreen() {
+fun LoginScreen(onLoginSuccess: () -> Unit) {
     // State to control whether the email confirmation message is shown
-    var emailSent by remember { mutableStateOf(false) }
+    val emailSent by remember { mutableStateOf(false) }
     // State to hold the email input value
     var email by remember { mutableStateOf("") }
+    var loginError by remember { mutableStateOf(false) }
+
+    fun onUserLogin() {
+        // Example dummy check: treat "test@example.com" as correct.
+        if (email == "test@example.com") {
+            // ✅ Login success
+            onLoginSuccess()
+        } else {
+            // ❌ Login failed
+            loginError = true
+        }
+    }
 
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827) from original HTML
@@ -74,12 +85,7 @@ fun LoginScreen() {
                     onSignInGoogle = {  },
                     onSignInMicrosoft = {  },
                     onSignInYahoo = {  },
-                    onUserLogin = {
-                        // When user clicks 'Enter', simulate email sent and update state
-                        emailSent = true
-                        // Do: Add your actual user login API call here
-                        // For example: authViewModel.loginWithEmail(email)
-                    },
+                    onUserLogin = { onUserLogin() }, // ✅ works too
                 )
             } else {
                 // Display the email confirmation message
@@ -93,7 +99,7 @@ fun LoginScreen() {
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen()
+    LoginScreen(onLoginSuccess = {})
 }
 
 @Composable
@@ -108,10 +114,12 @@ fun FirstRowLoginLayout(
     // This Column represents the main container for the login form elements.
     // The padding from the original Next.js code is applied here.
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp, top = 8.dp) // Adjusted to match original padding pl-4 pr-4 pt-2
-    ) {
+            modifier = Modifier
+                .fillMaxSize() // You can use fillMaxSize() instead of fillMaxWidth() + fillMaxHeight()
+                .padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         // The original Next.js code had a Row containing the "Log In" text and then the LoginForm.
         // Since LoginForm already includes the "Log In" text, we need to decide where it should be.
         // If you want a separate "Log In" header *outside* the LoginForm's styled box,
@@ -175,7 +183,7 @@ fun LoginForm(
                 .padding(vertical = 10.dp)
                 .widthIn(max = 450.dp) // max-w-[450px]
                 .border(
-                    width = 1.dp,
+                    width = 0.5.dp,
                     color = MaterialTheme.colorScheme.outlineVariant, // dark:border-gray-600
                     shape = RoundedCornerShape(8.dp)
                 )
@@ -205,32 +213,36 @@ fun LoginForm(
                 horizontalArrangement = Arrangement.SpaceAround // justify-between
             ) {
                 // Google Image
-                Image(
-                    painter = rememberAsyncImagePainter("[https://cdn.nikpevnev.com/assets/store/design/google.webp](https://cdn.nikpevnev.com/assets/store/design/google.webp)"),
-                    contentDescription = "Sign in with Google",
+                AsyncImage(
+                    model = "https://cdn.nikpevnev.com/assets/store/design/google.webp",
+                    contentDescription = "Yeti",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .size(50.dp) // w-[50px]
-                        .padding(4.dp) // m-4
+                        .size(70.dp)
+                        .padding(4.dp)
                         .clickable(onClick = onSignInGoogle)
                 )
+
+
                 // Microsoft Image
-                Image(
-                    painter = rememberAsyncImagePainter("[https://cdn.nikpevnev.com/assets/store/design/microsoft.webp](https://cdn.nikpevnev.com/assets/store/design/microsoft.webp)"),
-                    contentDescription = "Sign in with Microsoft",
+                AsyncImage(
+                    model = "https://cdn.nikpevnev.com/assets/store/design/microsoft.webp",
+                    contentDescription = "Yeti",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(70.dp)
                         .padding(4.dp)
                         .clickable(onClick = onSignInMicrosoft)
                 )
+
+
                 // Yahoo Image
-                Image(
-                    painter = rememberAsyncImagePainter("[https://cdn.nikpevnev.com/assets/store/design/yahoo.webp](https://cdn.nikpevnev.com/assets/store/design/yahoo.webp)"),
-                    contentDescription = "Sign in with Yahoo",
+                AsyncImage(
+                    model = "https://cdn.nikpevnev.com/assets/store/design/yahoo.webp",
+                    contentDescription = "Yeti",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .size(50.dp)
+                        .size(70.dp)
                         .padding(4.dp)
                         .clickable(onClick = onSignInYahoo)
                 )
