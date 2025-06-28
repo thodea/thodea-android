@@ -28,13 +28,24 @@ import com.example.thodea.ui.composables.tabs.profile.ThoughtCommentsScreen
 * @param modifier Modifier to be applied to the NavHost, typically for padding.
 */
 @Composable
-fun NavigationScreens(navController: NavHostController, modifier: Modifier = Modifier) {
+fun NavigationScreens(navController: NavHostController, modifier: Modifier = Modifier, isLoggedIn: Boolean,) {
     // NavHost is where the navigation graph is built
     NavHost(
         navController = navController,
-        startDestination = NavItem.Profile.path, // Define your starting route
+        startDestination = if (isLoggedIn) NavItem.Feed.path else NavItem.Login.path,
         modifier = modifier // Apply the padding modifier here
     ) {
+
+        composable(NavItem.Login.path) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(NavItem.Feed.path) {
+                        popUpTo(NavItem.Login.path) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         // Define all your composable destinations here
         composable(NavItem.Post.path) {
             PostScreen(onNavigateToFeed = {

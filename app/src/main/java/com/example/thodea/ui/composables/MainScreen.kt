@@ -54,6 +54,10 @@ fun MainScreen(navController: NavHostController) {
     ) { paddingValues -> // paddingValues account for the top and bottom bars
         // This is where the actual navigation graph is defined and rendered
         // The paddingValues are passed to ensure content doesn't go under the bottom bar
-        NavigationScreens(navController = navController, modifier = Modifier.padding(paddingValues))
+        NavigationScreens(
+            navController = navController,
+            isLoggedIn = false, // 👈 For testing, force the Login screen
+            modifier = Modifier.padding(paddingValues)
+        )
     }
 }
