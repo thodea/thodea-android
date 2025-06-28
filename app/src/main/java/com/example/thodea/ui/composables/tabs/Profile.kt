@@ -40,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.example.thodea.R
 
 /**
@@ -49,11 +50,12 @@ import com.example.thodea.R
 @Preview(showBackground = true)
 @Composable
 fun ProfileScreenPreview() {
+    val navController = rememberNavController()
     ProfileScreen(
         onNavigateToSettings = {}, onNavigateToChats = {},
         onNavigateToFollowers = {},
         onNavigateToFollowing = {},
-        navController = {} as NavController,
+        navController = navController,
     )
 }
 
