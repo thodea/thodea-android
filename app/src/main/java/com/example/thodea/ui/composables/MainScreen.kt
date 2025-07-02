@@ -56,7 +56,7 @@ fun MainScreen(navController: NavHostController) {
         // The paddingValues are passed to ensure content doesn't go under the bottom bar
         NavigationScreens(
             navController = navController,
-            isLoggedIn = true, // 👈 For testing, force the Login screen
+            isLoggedIn = false, // 👈 For testing, force the Login screen
             modifier = Modifier.padding(paddingValues)
         )
     }
