@@ -1,4 +1,4 @@
-package com.example.thodea.ui.composables.tabs.profile
+package com.example.thodea.ui.composables.tabs.profilepackage
 
 
 import androidx.compose.foundation.background
@@ -115,11 +115,18 @@ fun ThoughtCommentsRowLayout(onBack: () -> Unit,
         Thought(
             username = "alice42",
             thoughtId = thoughtId,
-            //onThoughtClick = { id -> navController.navigate("comments/$id") },
+            thought = com.example.thodea.ui.composables.tabs.Thought(
+                id = thoughtId,
+                urlTitle = "Sample Thought",
+                urlDescription = "This is a sample thought for comments",
+                authorId = "alice42"
+            ),
+            isSelected = false,
             onThoughtClick = {  },
+            onNavigateToComments = {  },
             onLoveClick = { id -> println("Loved thought: $id") },
-            //onUsernameClick = { name -> navController.navigate("profile/$name") }
             onUsernameClick = { },
+            onDeleteClick = { },
             borderSwitch = false,
         )
         Spacer(modifier = Modifier.height(2.dp))

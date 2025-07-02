@@ -21,10 +21,18 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -56,9 +64,21 @@ fun FeedScreenPreview() {
     FeedScreen()
 }
 
-
 @Composable
 fun FeedScreen(navController: NavController? = null) {
+    // State to track which thought is currently selected
+    var selectedThoughtId by remember { mutableStateOf<String?>(null) }
+
+    // Sample thoughts for demonstration
+    val thoughts = remember {
+        listOf(
+            Thought(id = "1", urlTitle = "Jetpack Compose Basics", urlDescription = "A modern toolkit for building native Android UIs.", authorId = "alice42"),
+            Thought(id = "2", urlTitle = "Android Development", urlDescription = "Building amazing mobile apps", authorId = "john_dev"),
+            Thought(id = "3", urlTitle = "UI Design Patterns", urlDescription = "Modern design patterns for mobile apps", authorId = "designer_mike")
+        )
+    }
+
+    var thoughtsList by remember { mutableStateOf(thoughts) }
 
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827)
@@ -72,27 +92,41 @@ fun FeedScreen(navController: NavController? = null) {
                 .fillMaxSize()
                 .padding(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
-                ) {
+            ) {
                 FollowToCustomizeFeed()
                 Spacer(modifier = Modifier.height(8.dp))
                 MonthlyLovedLabel()
                 Spacer(modifier = Modifier.height(8.dp))
                 MostFollowedLabel()
                 Spacer(modifier = Modifier.height(8.dp))
-                Thought(
-                    username = "alice42",
-                    thoughtId = "abc123",
-                    //onThoughtClick = { id -> navController.navigate("comments/$id") },
-                    onThoughtClick = {
-                        navController?.navigate("thought/$12")
-                    },
-                    onLoveClick = { id -> println("Loved thought: $id") },
-                    //onUsernameClick = { name -> navController.navigate("profile/$name") }
-                    onUsernameClick = { },
-                    borderSwitch = true,
-                )
-            }
 
+                // Display all thoughts
+                thoughtsList.forEach { thought ->
+                    Thought(
+                        username = thought.authorId ?: "unknown",
+                        thoughtId = thought.id,
+                        thought = thought,
+                        isSelected = selectedThoughtId == thought.id,
+                        onThoughtClick = { id ->
+                            // Toggle selection: if already selected, deselect; otherwise select
+                            selectedThoughtId = if (selectedThoughtId == id) null else id
+                        },
+                        onNavigateToComments = {
+                            navController?.navigate("thought/${thought.id}")
+                        },
+                        onLoveClick = { id -> println("Loved thought: $id") },
+                        onUsernameClick = { },
+                        onDeleteClick = { id ->
+                            // Remove thought from list
+                            thoughtsList = thoughtsList.filter { it.id != id }
+                            // Clear selection
+                            selectedThoughtId = null
+                        },
+                        borderSwitch = true,
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
         }
     }
 }
@@ -207,11 +241,17 @@ fun MostFollowedLabel() {
 fun Thought(
     username: String,
     thoughtId: String,
+    thought: Thought,
+    isSelected: Boolean = false,
     onThoughtClick: (thoughtId: String) -> Unit,
+    onNavigateToComments: () -> Unit = {},
     onLoveClick: (thoughtId: String) -> Unit,
     onUsernameClick: (username: String) -> Unit,
+    onDeleteClick: (thoughtId: String) -> Unit = {},
     borderSwitch: Boolean
 ) {
+    var showDropdownMenu by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -237,11 +277,16 @@ fun Thought(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(Color(0xFF111827))
+                .background(
+                    if (isSelected) Color(0xFF1F2937).copy(alpha = 0.8f) // Highlighted background when selected
+                    else Color(0xFF111827)
+                )
                 .clip(RoundedCornerShape(8.dp))
                 .border(
-                    width = 1.dp,
-                    color = if (borderSwitch) Color(31, 41, 55) else Color.Transparent,
+                    width = if (isSelected) 2.dp else 1.dp,
+                    color = if (isSelected) Color(0xFF3B82F6) // Blue border when selected
+                    else if (borderSwitch) Color(31, 41, 55)
+                    else Color.Transparent,
                     shape = RoundedCornerShape(8.dp)
                 )
                 .padding(2.dp)
@@ -251,6 +296,7 @@ fun Thought(
         ) {
             Column(
                 modifier = Modifier
+                    .weight(1f)
                     .then(
                         if (borderSwitch) Modifier.padding(6.dp) else Modifier
                     )
@@ -265,7 +311,7 @@ fun Thought(
                     )
 
                     Text(
-                        text = "username",
+                        text = username,
                         color = Color.Gray,
                         fontSize = 16.sp,
                         modifier = Modifier
@@ -278,7 +324,7 @@ fun Thought(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    if (borderSwitch) {
+                    if (borderSwitch && !isSelected) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_nav),
                             contentDescription = "Image icon",
@@ -286,22 +332,13 @@ fun Thought(
                             modifier = Modifier.size(24.dp)
                         )
                     }
-
                 }
 
                 Row(modifier = Modifier.padding(top = 10.dp, bottom = 4.dp)) {
                     Text(text = "Main text", color = Color(222, 220, 220, 255), fontSize = 16.sp)
                 }
 
-                ThoughtUrlDisplay(
-                    thought = Thought(
-                        id = "1",
-                        urlTitle = "Jetpack Compose Basics",
-                        urlDescription = "A modern toolkit for building native Android UIs.",
-                        createdAt = System.currentTimeMillis(),
-                        authorId = "user_123"
-                    )
-                )
+                ThoughtUrlDisplay(thought = thought)
 
                 Row(
                     modifier = Modifier.padding(top = 8.dp),
@@ -332,6 +369,9 @@ fun Thought(
                         modifier = Modifier
                             .size(24.dp)
                             .padding(start = 8.dp, top = 2.dp)
+                            .clickable {
+                                onNavigateToComments()
+                            }
                     )
                     Text(
                         text = "0",
@@ -371,6 +411,42 @@ fun Thought(
 
                     Spacer(modifier = Modifier.weight(1f))
                     Text(text = "Date", color = Color.Gray)
+                }
+            }
+
+            // Three dots menu - only show when thought is selected
+            if (isSelected) {
+                Box {
+                    IconButton(
+                        onClick = { showDropdownMenu = true },
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "More options",
+                            tint = Color(0xFF9CA3AF),
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    DropdownMenu(
+                        expanded = showDropdownMenu,
+                        onDismissRequest = { showDropdownMenu = false },
+                        modifier = Modifier.background(Color(0xFF1F2937))
+                    ) {
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    "Delete",
+                                    color = Color(0xFFEF4444) // Red color for delete
+                                )
+                            },
+                            onClick = {
+                                showDropdownMenu = false
+                                onDeleteClick(thoughtId)
+                            }
+                        )
+                    }
                 }
             }
         }

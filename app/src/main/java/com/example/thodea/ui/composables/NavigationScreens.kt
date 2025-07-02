@@ -18,7 +18,8 @@ import com.example.thodea.ui.composables.tabs.profile.ChatsScreen
 import com.example.thodea.ui.composables.tabs.profile.FollowInfoScreen
 import com.example.thodea.ui.composables.tabs.profile.FollowType
 import com.example.thodea.ui.composables.tabs.profile.SettingsScreen
-import com.example.thodea.ui.composables.tabs.profile.ThoughtCommentsScreen
+
+import com.example.thodea.ui.composables.tabs.profilepackage.ThoughtCommentsScreen
 
 /***
 * Composable function that defines the navigation screens and their corresponding destinations.
@@ -143,3 +144,5 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
         }
     }
 }
+
+
