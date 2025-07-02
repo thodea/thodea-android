@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,13 +18,11 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,14 +32,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -111,6 +112,7 @@ fun FirstRowLoginLayout(
     onSignInYahoo: () -> Unit,
     onUserLogin: () -> Unit, // This lambda will be called to update emailSent in LoginScreen
 ) {
+
     // This Column represents the main container for the login form elements.
     // The padding from the original Next.js code is applied here.
     Column(
@@ -152,7 +154,7 @@ fun FirstRowLoginLayout(
             onSignInGoogle = onSignInGoogle,
             onSignInMicrosoft = onSignInMicrosoft,
             onSignInYahoo = onSignInYahoo,
-            onUserLogin = onUserLogin, // This will trigger the emailSent state update in LoginScreen
+            onUserLogin = onUserLogin, // This will trigger the emailSent state update in LoginScreen,
         )
     }
 }
@@ -184,7 +186,7 @@ fun LoginForm(
                 .widthIn(max = 450.dp) // max-w-[450px]
                 .border(
                     width = 0.5.dp,
-                    color = MaterialTheme.colorScheme.outlineVariant, // dark:border-gray-600
+                    color = Color(58, 58, 58, 255), // dark:border-gray-600
                     shape = RoundedCornerShape(8.dp)
                 )
                 .shadow(
@@ -194,17 +196,19 @@ fun LoginForm(
                     spotColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
                 )
                 .background(Color.Transparent) // Default background for the card
-                .padding(bottom = 4.dp)
+                .padding(top = 4.dp, bottom = 12.dp)
         ) {
             Text(
                 text = "Log In",
                 fontSize = 22.sp, // text-2xl
-                color = Color.Gray, // text-blue-200
+                color = Color(194, 194, 194, 255), // text-blue-200
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 8.dp, horizontal = 4.dp) // p-2 pb-4
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             Row(
                 modifier = Modifier
@@ -248,31 +252,34 @@ fun LoginForm(
                 )
             }
 
+            Spacer(modifier = Modifier.height(18.dp))
+
             // "Or" Divider
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(horizontal = 16.dp,vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.outline
+                    color = Color(17, 93, 180)
                 )
                 Text(
                     text = "Or",
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(horizontal = 8.dp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Color(17, 93, 180)
                 )
                 HorizontalDivider(
                     modifier = Modifier.weight(1f),
-                    color = MaterialTheme.colorScheme.outline
+                    color = Color(17, 93, 180)
                 )
             }
 
             // Email Input
-            OutlinedTextField(
+            /*OutlinedTextField(
                 value = email,
                 onValueChange = onEmailChange,
                 label = { Text("Email") },
@@ -290,35 +297,86 @@ fun LoginForm(
                     .fillMaxWidth()
                     .height(80.dp) // approximate h-[40px] with label
                     .padding(horizontal = 16.dp, vertical = 4.dp) // m-4
-            )
+            )*/
 
+            Spacer(modifier = Modifier.height(18.dp))
 
+            Row(modifier = Modifier.height(40.dp)) {
+                BasicTextField(
+                    maxLines = 1,
+                    value = email,
+                    onValueChange = {
+                        // Enforce 150-char limit and prevent manual newlines
+                        val sanitized = it.replace("\n", "")
+                        if (sanitized.length <= 150) {
+                            onEmailChange(sanitized)
+                        }
+                    },
+                    singleLine = true,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 16.dp, vertical = 4.dp)
+                        .height(50.dp)
+                        .drawBehind {
+                            val strokeWidth = 1.dp.toPx()
+                            val y = size.height
+                            drawLine(
+                                color = Color(30, 58, 138),
+                                start = Offset(0f, y),
+                                end = Offset(size.width, y),
+                                strokeWidth = strokeWidth
+                            )
+                        },
+                    textStyle = TextStyle(
+                        fontSize = 24.sp,
+                        color = Color(229, 231, 235),
+                    ),
+                    cursorBrush = SolidColor(Color(229, 231, 235)),
+                    decorationBox = { innerTextField ->
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(end = 8.dp, bottom = 4.dp)
+                        ) {
+                            if (email.isEmpty()) {
+                                Text(
+                                    "Email",
+                                    fontSize = 24.sp,
+                                    color = Color.Gray
+                                )
+                            }
+                            innerTextField()
+                        }
+                    }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
             // Enter Button
             Button(
                 onClick = onUserLogin,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(55.dp) // pt-1 pb-1 with text-2xl
-                    .padding(horizontal = 16.dp, vertical = 4.dp) // m-4
-                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(4.dp)), // shadow-md
-                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent), // Make button transparent to apply gradient
+                    .height(45.dp)
+                    .padding(horizontal = 16.dp, vertical = 4.dp)
+                    .shadow(elevation = 4.dp, shape = RoundedCornerShape(4.dp)),
+                shape = RoundedCornerShape(4.dp), // ✅ Add this to clip corners
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent),
                 contentPadding = PaddingValues(0.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(Color.Blue, Color.Green) // from-[#c6f7ff] to-[#d5ffd5]
-                            ),
-                            shape = RoundedCornerShape(4.dp) // rounded-sm
+                            color = Color(30, 58, 138),
+                            shape = RoundedCornerShape(4.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "Enter",
-                        fontSize = 22.sp, // text-2xl
-                        color = MaterialTheme.colorScheme.onSurface // Adjust color for readability on gradient
+                        fontSize = 22.sp,
+                        color = Color.White
                     )
                 }
             }
@@ -326,28 +384,34 @@ fun LoginForm(
 
         // Terms and Privacy Text
         Row(
-            modifier = Modifier.padding(top = 16.dp), // mt-6
+            modifier = Modifier
+                .fillMaxWidth() // ✅ Make row take full width
+                .padding(top = 16.dp),
+            horizontalArrangement = Arrangement.Center, // ✅ Center content horizontally
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "By entering you agree to ",
-                fontSize = 16.sp, // text-lg
-                color = Color.Gray // text-gray-500
-            )
-            val annotatedString = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = Color.Blue, fontWeight = FontWeight.Medium)) {
-                    append("Terms of Use")
+            Column(horizontalAlignment = Alignment.CenterHorizontally) { // ✅ Center Column content
+                Text(
+                    text = "By entering you agree to ",
+                    fontSize = 18.sp, // ✅ Bigger text
+                    color = Color.Gray // ✅ Gray text
+                )
+                val annotatedString = buildAnnotatedString {
+                    withStyle(style = SpanStyle(color = Color(59, 130, 246), fontWeight = FontWeight.Medium)) {
+                        append("Terms of Use")
+                    }
+                    append(" and ")
+                    withStyle(style = SpanStyle(color = Color(59, 130, 246), fontWeight = FontWeight.Medium)) {
+                        append("Privacy Policy")
+                    }
                 }
-                append(" and ")
-                withStyle(style = SpanStyle(color = Color.Blue, fontWeight = FontWeight.Medium)) {
-                    append("Privacy Policy")
-                }
+                Text(
+                    text = annotatedString,
+                    fontSize = 18.sp, // ✅ Match size
+                    color = Color.Gray, // ✅ Base color is gray (blue styles override)
+                    modifier = Modifier.padding(top = 4.dp).clickable { /* Handle link clicks */ }
+                )
             }
-            Text(
-                text = annotatedString,
-                fontSize = 16.sp,
-                modifier = Modifier.clickable { /* Handle link clicks */ }
-            )
         }
 
 
