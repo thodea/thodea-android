@@ -32,7 +32,7 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
     // NavHost is where the navigation graph is built
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) NavItem.Feed.path else NavItem.Login.path,
+        startDestination = if (isLoggedIn) NavItem.Feed.path else NavItem.Setup.path,
         modifier = modifier // Apply the padding modifier here
     ) {
 
@@ -64,6 +64,7 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
         }
 
         composable(NavItem.Search.path) { SearchScreen() }
+        composable(NavItem.Setup.path) { SetupScreen() }
 
         // ProfileScreen is your primary screen for triggering follower/following navigation
         composable(NavItem.Profile.path) {

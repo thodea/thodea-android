@@ -52,7 +52,7 @@ import coil3.compose.AsyncImage
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
     // State to control whether the email confirmation message is shown
-    val emailSent by remember { mutableStateOf(false) }
+       val emailSent by remember { mutableStateOf(false) }
     // State to hold the email input value
     var email by remember { mutableStateOf("") }
     var loginError by remember { mutableStateOf(false) }
