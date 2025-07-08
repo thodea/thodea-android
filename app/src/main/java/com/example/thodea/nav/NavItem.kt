@@ -23,6 +23,9 @@ sealed class NavItem(
     object Login : NavItem(
         path = "login"
     )
+    object Setup : NavItem(
+        path = "setup"
+    )
     object ChatRequests : NavItem(
         path = "chat requests"
     )
