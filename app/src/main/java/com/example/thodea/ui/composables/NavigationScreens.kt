@@ -32,7 +32,7 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
     // NavHost is where the navigation graph is built
     NavHost(
         navController = navController,
-        startDestination = if (isLoggedIn) NavItem.Feed.path else NavItem.Setup.path,
+        startDestination = if (isLoggedIn) NavItem.Feed.path else NavItem.Login.path,
         modifier = modifier // Apply the padding modifier here
     ) {
 

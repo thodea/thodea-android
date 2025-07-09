@@ -1,5 +1,6 @@
 package com.example.thodea.ui.composables
 
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,16 +39,15 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import androidx.core.net.toUri
 
 @Composable
 fun LoginScreen(onLoginSuccess: () -> Unit) {
@@ -382,6 +382,10 @@ fun LoginForm(
             }
         }
 
+
+        // Function to handle the click and open the URL
+        val context = LocalContext.current
+
         // Terms and Privacy Text
         Row(
             modifier = Modifier
@@ -396,21 +400,37 @@ fun LoginForm(
                     fontSize = 18.sp, // ✅ Bigger text
                     color = Color.Gray // ✅ Gray text
                 )
-                val annotatedString = buildAnnotatedString {
-                    withStyle(style = SpanStyle(color = Color(59, 130, 246), fontWeight = FontWeight.Medium)) {
-                        append("Terms of Use")
-                    }
-                    append(" and ")
-                    withStyle(style = SpanStyle(color = Color(59, 130, 246), fontWeight = FontWeight.Medium)) {
-                        append("Privacy Policy")
-                    }
+                Row {
+                    Text(
+                        text = "Terms of Use",
+                        fontSize = 18.sp, // ✅ Match size
+                        fontWeight = FontWeight.Medium,
+                        color = Color(59, 130, 246), // ✅ Base color is gray (blue styles override)
+                        modifier = Modifier.padding(top = 4.dp).clickable {
+                            val customTabsIntent = CustomTabsIntent.Builder().build()
+                            customTabsIntent.launchUrl(context,
+                                "https://www.thodea.com/policy/terms".toUri())
+                        }
+                    )
+                    Text(
+                        text = " and ",
+                        fontSize = 18.sp, // ✅ Match size
+                        color = Color.Gray, // ✅ Base color is gray (blue styles override)
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                    Text(
+                        text = "Privacy Policy",
+                        fontSize = 18.sp, // ✅ Match size
+                        fontWeight = FontWeight.Medium,
+                        color = Color(59, 130, 246), // ✅ Base color is gray (blue styles override)
+                        modifier = Modifier.padding(top = 4.dp).clickable {
+                            val customTabsIntent = CustomTabsIntent.Builder().build()
+                            customTabsIntent.launchUrl(context,
+                                "https://www.thodea.com/policy/privacy".toUri())
+                        }
+                    )
                 }
-                Text(
-                    text = annotatedString,
-                    fontSize = 18.sp, // ✅ Match size
-                    color = Color.Gray, // ✅ Base color is gray (blue styles override)
-                    modifier = Modifier.padding(top = 4.dp).clickable { /* Handle link clicks */ }
-                )
+
             }
         }
 
