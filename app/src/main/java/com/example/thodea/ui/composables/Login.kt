@@ -1,6 +1,7 @@
 package com.example.thodea.ui.composables
 
 import androidx.browser.customtabs.CustomTabsIntent
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -22,11 +23,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,24 +52,48 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import androidx.core.net.toUri
+import kotlinx.coroutines.delay
 
 @Composable
-fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun GreenBorderCheckbox() {
+    var checked by remember { mutableStateOf(true) }
+
+    Box(
+        modifier = Modifier
+            .size(30.dp)
+            .padding(end = 4.dp)
+            .background(Color.Transparent, shape = RoundedCornerShape(4.dp))
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = { checked = it },
+            colors = CheckboxDefaults.colors(
+                checkedColor = Color.Transparent,
+                uncheckedColor = Color.Transparent,
+                checkmarkColor = Color.Green
+            ),
+            modifier = Modifier
+                .background(Color.Transparent)
+                .border(
+                    BorderStroke(2.dp, Color.Transparent),
+                    shape = RoundedCornerShape(4.dp)
+                )
+        )
+    }
+}
+
+@Composable
+//fun LoginScreen(onLoginSuccess: () -> Unit) {
+fun LoginScreen() {
     // State to control whether the email confirmation message is shown
-       val emailSent by remember { mutableStateOf(false) }
+       var emailSent by remember { mutableStateOf(false) }
     // State to hold the email input value
     var email by remember { mutableStateOf("") }
-    var loginError by remember { mutableStateOf(false) }
 
     fun onUserLogin() {
         // Example dummy check: treat "test@example.com" as correct.
-        if (email == "test@example.com") {
-            // ✅ Login success
-            onLoginSuccess()
-        } else {
-            // ❌ Login failed
-            loginError = true
-        }
+        emailSent = true
+            //onLoginSuccess()
     }
 
     Scaffold(
@@ -91,7 +119,18 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
             } else {
                 // Display the email confirmation message
                 //EmailSentConfirmation()
-                Text("here")
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    GreenBorderCheckbox()
+                    Text(
+                        text = "Check email to log in",
+                        color = Color(229 ,231, 235),
+                        fontSize = 24.sp // text-2xl (adjust with breakpoints if needed)
+                    )
+                }
             }
         }
     }
@@ -100,7 +139,8 @@ fun LoginScreen(onLoginSuccess: () -> Unit) {
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
-    LoginScreen(onLoginSuccess = {})
+    //LoginScreen(onLoginSuccess = {})
+    LoginScreen()
 }
 
 @Composable
@@ -299,62 +339,113 @@ fun LoginForm(
                     .padding(horizontal = 16.dp, vertical = 4.dp) // m-4
             )*/
 
+            var showError by remember { mutableStateOf(false) }
+
             Spacer(modifier = Modifier.height(18.dp))
 
             Row(modifier = Modifier.height(40.dp)) {
-                BasicTextField(
-                    maxLines = 1,
-                    value = email,
-                    onValueChange = {
-                        // Enforce 150-char limit and prevent manual newlines
-                        val sanitized = it.replace("\n", "")
-                        if (sanitized.length <= 150) {
-                            onEmailChange(sanitized)
-                        }
-                    },
-                    singleLine = true,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 16.dp, vertical = 4.dp)
-                        .height(50.dp)
-                        .drawBehind {
-                            val strokeWidth = 1.dp.toPx()
-                            val y = size.height
-                            drawLine(
-                                color = Color(30, 58, 138),
-                                start = Offset(0f, y),
-                                end = Offset(size.width, y),
-                                strokeWidth = strokeWidth
-                            )
+                if (!showError) {
+                    BasicTextField(
+                        maxLines = 1,
+                        value = email,
+                        onValueChange = {
+                            val sanitized = it
+                                .replace("\n", "")
+                                .filter { char ->
+                                    char.isLetterOrDigit() || char in setOf('.', '_', '%', '+', '-', '@')
+                                }
+
+                            if (sanitized.length <= 150) {
+                                onEmailChange(sanitized)
+                            }
                         },
-                    textStyle = TextStyle(
+                        singleLine = true,
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .height(50.dp)
+                            .drawBehind {
+                                val strokeWidth = 1.dp.toPx()
+                                val y = size.height
+                                drawLine(
+                                    color = Color(30, 58, 138),
+                                    start = Offset(0f, y),
+                                    end = Offset(size.width, y),
+                                    strokeWidth = strokeWidth
+                                )
+                            },
+                        textStyle = TextStyle(
+                            fontSize = 24.sp,
+                            color = Color(229, 231, 235),
+                        ),
+                        cursorBrush = SolidColor(Color(229, 231, 235)),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(end = 8.dp, bottom = 4.dp)
+                            ) {
+                                if (email.isEmpty()) {
+                                    Text(
+                                        text = "Email",
+                                        fontSize = 24.sp,
+                                        color = Color.Gray
+                                    )
+                                }
+                                innerTextField()
+                            }
+                        }
+                    )
+                } else {
+                    Text(
+                        text = "Enter valid email",
                         fontSize = 24.sp,
-                        color = Color(229, 231, 235),
-                    ),
-                    cursorBrush = SolidColor(Color(229, 231, 235)),
-                    decorationBox = { innerTextField ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(end = 8.dp, bottom = 4.dp)
-                        ) {
-                            if (email.isEmpty()) {
-                                Text(
-                                    "Email",
-                                    fontSize = 24.sp,
-                                    color = Color.Gray
+                        color = Color(255,131,131),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 4.dp)
+                            .height(50.dp)
+                            .drawBehind {
+                                val strokeWidth = 1.dp.toPx()
+                                val y = size.height
+                                drawLine(
+                                    color = Color(30, 58, 138),
+                                    start = Offset(0f, y),
+                                    end = Offset(size.width, y),
+                                    strokeWidth = strokeWidth
                                 )
                             }
-                            innerTextField()
-                        }
-                    }
-                )
+                    )
+                }
+
             }
+            var triggerError by remember { mutableStateOf(false) }
+            // Email regex for validation
+
+            // Handle error reset after 2 seconds
+            LaunchedEffect(triggerError) { // Use triggerError as key to re-launch effect
+                if (triggerError) {
+                    delay(2000)
+                    showError = false
+                    triggerError = false
+                }
+            }
+
 
             Spacer(modifier = Modifier.height(16.dp))
             // Enter Button
+            val emailRegex = Regex(
+                "^(?!.*\\.\\.)[a-zA-Z0-9](?:[a-zA-Z0-9._%+-]{0,63}[a-zA-Z0-9])?@[a-zA-Z0-9](?:[a-zA-Z0-9.-]{0,253}[a-zA-Z0-9])?\\.[a-zA-Z]{2,}\$"
+            )
             Button(
-                onClick = onUserLogin,
+                onClick = { // This is the lambda block expected by onClick
+                    if (!emailRegex.matches(email)) {
+                        showError = true
+                        triggerError = true // Set state to trigger LaunchedEffect
+                    } else {
+                        onUserLogin() // Call the function
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(45.dp)
