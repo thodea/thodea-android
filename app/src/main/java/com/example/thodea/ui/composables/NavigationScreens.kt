@@ -38,11 +38,11 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
 
         composable(NavItem.Login.path) {
             LoginScreen(
-                onLoginSuccess = {
+                /*onLoginSuccess = {
                     navController.navigate(NavItem.Feed.path) {
                         popUpTo(NavItem.Login.path) { inclusive = true }
                     }
-                }
+                }*/
             )
         }
 
