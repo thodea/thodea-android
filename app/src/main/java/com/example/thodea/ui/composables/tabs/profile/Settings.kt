@@ -1,6 +1,7 @@
 package com.example.thodea.ui.composables.tabs.profile
 
 import androidx.compose.foundation.background
+import androidx.browser.customtabs.CustomTabsIntent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -13,12 +14,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.thodea.R
+import androidx.core.net.toUri
 
 
 @Preview(showBackground = true)
@@ -80,6 +83,8 @@ fun BackButton(onClick: () -> Unit) {
 
 @Composable
 fun FirstRowLayout(onBack: () -> Unit) {
+    val context = LocalContext.current
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -91,21 +96,24 @@ fun FirstRowLayout(onBack: () -> Unit) {
         SettingsItem(title = "LOG OUT", onClick = { })
         SettingsItem(title = "DELETE", onClick = { })
         SettingsItem(title = "users: ", onClick = { })
-        SettingsItem(title = "About", onClick = { })
+        SettingsItem(title = "About", onClick = {
+            val customTabsIntent = CustomTabsIntent.Builder().build()
+            customTabsIntent.launchUrl(
+                context,
+                "https://www.thodea.com/about".toUri()
+            )
+        })
         Spacer(modifier = Modifier.weight(1f)) // pushes text to bottom
         // Bottom Text
-        BottomLinks(
-            onTermsClick = {},
-            onPrivacyClick = {}
-        )
+        BottomLinks()
     }
 }
 
 @Composable
-fun BottomLinks(
-    onTermsClick: () -> Unit,
-    onPrivacyClick: () -> Unit
-) {
+fun BottomLinks() {
+    // Function to handle the click and open the URL
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -121,8 +129,11 @@ fun BottomLinks(
                 text = "Terms",
                 color = Color(0xFF3B82F6), // blue-500
                 fontSize = 20.sp,
-                modifier = Modifier
-                    .clickable { onTermsClick() }
+                modifier = Modifier.clickable {
+                    val customTabsIntent = CustomTabsIntent.Builder().build()
+                    customTabsIntent.launchUrl(context,
+                        "https://www.thodea.com/policy/terms".toUri())
+                    }
                     .padding(8.dp)
             )
 
@@ -131,8 +142,11 @@ fun BottomLinks(
                 text = "Privacy",
                 color = Color(0xFF3B82F6), // blue-500
                 fontSize = 20.sp,
-                modifier = Modifier
-                    .clickable { onPrivacyClick() }
+                modifier = Modifier.clickable {
+                    val customTabsIntent = CustomTabsIntent.Builder().build()
+                    customTabsIntent.launchUrl(context,
+                        "https://www.thodea.com/policy/privacy".toUri())
+                }
                     .padding(8.dp)
             )
         }
