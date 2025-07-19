@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -98,24 +99,76 @@ fun SetupScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
+
+                val usernameTaken by remember { mutableStateOf(false) }
+
                 Row(modifier = Modifier.height(40.dp),
                     verticalAlignment = Alignment.CenterVertically) {
 
-                    BasicTextField(
-                        maxLines = 1,
-                        value = username,
-                        onValueChange = {
-                            // Enforce 150-char limit and prevent manual newlines
-                            val sanitized = it.replace("\n", "")
-                            if (sanitized.length <= 150) {
-                                username = sanitized
-                            }
-                        },
-                        singleLine = true,
+                    Row(modifier = Modifier.height(40.dp)) {
+                        if (!usernameTaken) {
+                            BasicTextField(
+                                maxLines = 1,
+                                value = username,
+                                onValueChange = {
+                                    // Remove disallowed characters: keep only a-z, 0-9, _
+                                    val sanitized = it
+                                        .lowercase()
+                                        .replace(Regex("[^a-z0-9_]"), "")
+
+                                    // Enforce max length 14
+                                    username = if (sanitized.length <= 14) {
+                                        sanitized
+                                    } else {
+                                        sanitized.take(14)
+                                    }
+                                },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(start = 16.dp, end = 8.dp)
+                                    .height(34.dp)
+                                    .drawBehind {
+                                        val strokeWidth = 1.dp.toPx()
+                                        val y = size.height
+                                        drawLine(
+                                            color = Color(30, 58, 138),
+                                            start = Offset(0f, y),
+                                            end = Offset(size.width, y),
+                                            strokeWidth = strokeWidth
+                                        )
+                                    },
+                                textStyle = TextStyle(
+                                    fontSize = 24.sp,
+                                    color = Color(229, 231, 235),
+                                ),
+                                cursorBrush = SolidColor(Color(229, 231, 235)),
+                                decorationBox = { innerTextField ->
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(end = 8.dp, bottom = 4.dp)
+                                    ) {
+                                        if (username.isEmpty()) {
+                                            Text(
+                                                "username",
+                                                fontSize = 24.sp,
+                                                color = Color.Gray
+                                            )
+                                        }
+                                        innerTextField()
+                                    }
+                                }
+                            )
+                        }  else {
+                    Text(
+                        text = "username taken",
+                        fontSize = 24.sp,
+                        color = Color(255, 131, 131),
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(1f) // match BasicTextField weight
                             .padding(start = 16.dp, end = 8.dp)
-                            .height(50.dp)
+                            .height(34.dp)
                             .drawBehind {
                                 val strokeWidth = 1.dp.toPx()
                                 val y = size.height
@@ -126,28 +179,10 @@ fun SetupScreen(
                                     strokeWidth = strokeWidth
                                 )
                             },
-                        textStyle = TextStyle(
-                            fontSize = 24.sp,
-                            color = Color(229, 231, 235),
-                        ),
-                        cursorBrush = SolidColor(Color(229, 231, 235)),
-                        decorationBox = { innerTextField ->
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(end = 8.dp, bottom = 4.dp)
-                            ) {
-                                if (username.isEmpty()) {
-                                    Text(
-                                        "username",
-                                        fontSize = 24.sp,
-                                        color = Color.Gray
-                                    )
-                                }
-                                innerTextField()
-                            }
-                        }
+                        textAlign = TextAlign.Start
                     )
+                }
+                    }
 
                     if (username.isNotEmpty()) {
                         IconButton(
