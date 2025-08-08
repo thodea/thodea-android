@@ -34,6 +34,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,7 +53,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import androidx.core.net.toUri
+import com.example.thodea.AuthClient
+import com.example.thodea.FakeAuthClient
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun GreenBorderCheckbox() {
@@ -84,9 +88,12 @@ fun GreenBorderCheckbox() {
 
 @Composable
 //fun LoginScreen(onLoginSuccess: () -> Unit) {
-fun LoginScreen() {
+fun LoginScreen(googleAuthClient: AuthClient) {
     // State to control whether the email confirmation message is shown
-       var emailSent by remember { mutableStateOf(false) }
+    var emailSent by remember { mutableStateOf(false) }
+
+    val coroutineScope = rememberCoroutineScope()
+
     // State to hold the email input value
     var email by remember { mutableStateOf("") }
 
@@ -111,7 +118,12 @@ fun LoginScreen() {
                 FirstRowLoginLayout(
                     email = email,
                     onEmailChange = { email = it },
-                    onSignInGoogle = {  },
+                    onSignInGoogle = {
+                        coroutineScope.launch {
+                            googleAuthClient.signIn()
+                            // Optionally, navigate or update UI after sign out
+                        }
+                    },
                     onSignInMicrosoft = {  },
                     onSignInYahoo = {  },
                     onUserLogin = { onUserLogin() }, // ✅ works too
@@ -139,8 +151,9 @@ fun LoginScreen() {
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
+    val fakeAuthClient = FakeAuthClient()
     //LoginScreen(onLoginSuccess = {})
-    LoginScreen()
+    LoginScreen(googleAuthClient = fakeAuthClient)
 }
 
 @Composable

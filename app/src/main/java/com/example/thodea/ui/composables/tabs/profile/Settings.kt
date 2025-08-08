@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,16 +23,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.thodea.R
 import androidx.core.net.toUri
+import com.example.thodea.AuthClient
+import com.example.thodea.FakeAuthClient
+import kotlinx.coroutines.launch
 
 
 @Preview(showBackground = true)
 @Composable
 fun SettingsScreenPreview() {
-    SettingsScreen(onBack = {})
+    val fakeAuthClient = FakeAuthClient()
+    SettingsScreen(onBack = {}, googleAuthClient = fakeAuthClient)
 }
 
 @Composable
-fun SettingsScreen(onBack: () -> Unit) {
+fun SettingsScreen(onBack: () -> Unit, googleAuthClient: AuthClient) {
     Scaffold(
         containerColor = Color(0xFF111827) // Dark background (#111827)
     )  { paddingValues ->
@@ -40,7 +45,7 @@ fun SettingsScreen(onBack: () -> Unit) {
                 .padding(paddingValues)
                 .fillMaxSize()
         ) {
-            FirstRowLayout(onBack = onBack)
+            FirstRowLayout(onBack = onBack, googleAuthClient = googleAuthClient)
         }
     }
 }
@@ -82,8 +87,9 @@ fun BackButton(onClick: () -> Unit) {
 }
 
 @Composable
-fun FirstRowLayout(onBack: () -> Unit) {
+fun FirstRowLayout(onBack: () -> Unit, googleAuthClient: AuthClient) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -93,7 +99,10 @@ fun FirstRowLayout(onBack: () -> Unit) {
         BackButton(onClick = onBack)
         Spacer(modifier = Modifier.height(8.dp))
         SettingsItem(title = "Add Bio", onClick = { })
-        SettingsItem(title = "LOG OUT", onClick = { })
+        SettingsItem(title = "LOG OUT", onClick = { coroutineScope.launch {
+            googleAuthClient.signOut()
+            // Optionally, navigate or update UI after sign out
+        } })
         SettingsItem(title = "DELETE", onClick = { })
         SettingsItem(title = "users: ", onClick = { })
         SettingsItem(title = "About", onClick = {

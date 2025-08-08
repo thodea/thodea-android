@@ -3,13 +3,18 @@ package com.example.thodea
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
+import com.example.thodea.ui.composables.GoogleAuthClient
 import com.example.thodea.ui.composables.MainScreen
 import com.example.thodea.ui.theme.BottomTabNavigationJetpackComposeTheme
 
@@ -22,12 +27,22 @@ class MainActivity : ComponentActivity() {
      */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        val googleAuthClient = GoogleAuthClient(applicationContext)
         setContent {
             BottomTabNavigationJetpackComposeTheme {
                 val navController = rememberNavController()
+                val isSignedIn by rememberSaveable {
+                    mutableStateOf(googleAuthClient.isSignedIn())
+                }
+
                 Surface(modifier = Modifier.fillMaxSize(),
                     color = Color.Transparent ) {
-                    MainScreen(navController = navController)
+                    MainScreen(
+                        navController = navController,
+                        isSignedIn = isSignedIn,
+                        googleAuthClient = googleAuthClient,
+                    )
                 }
             }
         }
@@ -38,12 +53,29 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GreetingPreview() {
     val navController = rememberNavController()
+    val fakeAuthClient = FakeAuthClient()
     BottomTabNavigationJetpackComposeTheme {
         Surface(modifier = Modifier.fillMaxSize(),
             color = Color.Transparent ) {
-            MainScreen(navController = navController)
+            MainScreen(
+                navController = navController,
+                isSignedIn = false,
+                googleAuthClient = fakeAuthClient,
+            )
         }
     }
+}
+
+interface AuthClient {
+    suspend fun signIn(): Boolean
+    suspend fun signOut()
+    fun isSignedIn(): Boolean
+}
+
+class FakeAuthClient : AuthClient {
+    override fun isSignedIn(): Boolean = false
+    override suspend fun signIn(): Boolean = true
+    override suspend fun signOut() {}
 }
 
 

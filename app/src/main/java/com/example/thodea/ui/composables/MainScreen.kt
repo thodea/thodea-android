@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.thodea.AuthClient
 import com.example.thodea.nav.NavItem
 
 /***
@@ -22,7 +23,7 @@ import com.example.thodea.nav.NavItem
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun MainScreen(navController: NavHostController) {
+fun MainScreen(navController: NavHostController, isSignedIn: Boolean, googleAuthClient: AuthClient) {
     // Observe the current back stack entry to determine the current route
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -56,7 +57,8 @@ fun MainScreen(navController: NavHostController) {
         // The paddingValues are passed to ensure content doesn't go under the bottom bar
         NavigationScreens(
             navController = navController,
-            isLoggedIn = false, // 👈 For testing, force the Login screen
+            isLoggedIn = isSignedIn, // 👈 For testing, force the Login screen
+            googleAuthClient = googleAuthClient,
             modifier = Modifier.padding(paddingValues)
         )
     }
