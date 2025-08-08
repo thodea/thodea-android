@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.example.thodea.AuthClient
 import com.example.thodea.nav.NavItem
 import com.example.thodea.ui.composables.tabs.FeedScreen
 import com.example.thodea.ui.composables.tabs.PostScreen
@@ -28,7 +29,7 @@ import com.example.thodea.ui.composables.tabs.profile.ThoughtCommentsScreen
 * @param modifier Modifier to be applied to the NavHost, typically for padding.
 */
 @Composable
-fun NavigationScreens(navController: NavHostController, modifier: Modifier = Modifier, isLoggedIn: Boolean,) {
+fun NavigationScreens(navController: NavHostController, modifier: Modifier = Modifier, isLoggedIn: Boolean,googleAuthClient: AuthClient) {
     // NavHost is where the navigation graph is built
     NavHost(
         navController = navController,
@@ -38,6 +39,8 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
 
         composable(NavItem.Login.path) {
             LoginScreen(
+
+                googleAuthClient = googleAuthClient
                 /*onLoginSuccess = {
                     navController.navigate(NavItem.Feed.path) {
                         popUpTo(NavItem.Login.path) { inclusive = true }
@@ -89,7 +92,8 @@ fun NavigationScreens(navController: NavHostController, modifier: Modifier = Mod
         }
         composable(NavItem.Settings.path) {
             SettingsScreen(
-                onBack = { navController.popBackStack() }
+                onBack = { navController.popBackStack() },
+                googleAuthClient = googleAuthClient,
             )
         }
         composable(NavItem.Chats.path) {
